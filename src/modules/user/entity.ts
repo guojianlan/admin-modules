@@ -5,7 +5,7 @@ import {
   ValueTransformer,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { AbstractTypeEntity } from 'nestjs-abstract-module';
+import { AbstractTypeEntity } from '../../ab';
 import { IsEmail, IsNotEmpty } from 'class-validator';
 
 const saltOrRounds = 10;
@@ -24,12 +24,10 @@ export class TransformerPassword implements ValueTransformer {
     return hash(val);
   }
 }
-@Entity('user')
-export class UserEntity extends AbstractTypeEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+@Entity('admin_user')
+export class AdminUserEntity extends AbstractTypeEntity {
   @Column()
-  mobile: number;
+  mobile: string;
   @IsNotEmpty()
   @IsEmail()
   @Column()

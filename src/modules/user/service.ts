@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AbstractTypeOrmService } from 'nestjs-abstract-module';
+import { AbstractTypeOrmService } from '../../ab';
 import { Repository } from 'typeorm';
-import { UserEntity } from './entity';
+import { AdminUserEntity } from './entity';
 @Injectable()
-export class UserService extends AbstractTypeOrmService<UserEntity> {
+export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
   // entity: UserEntity;
   constructor(
-    @InjectRepository(UserEntity)
-    readonly repository: Repository<UserEntity>, // entity,
+    @InjectRepository(AdminUserEntity)
+    readonly repository: Repository<AdminUserEntity>, // entity,
   ) {
-    super(repository, UserEntity);
+    super(repository, AdminUserEntity, {
+      deleteAfterAction: 'log_sql',
+    });
   }
 }

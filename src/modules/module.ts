@@ -1,22 +1,35 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { Param } from './types';
-import { UserController, UserService, UserEntity } from './user';
+import { AdminUserController, AdminUserService, AdminUserEntity } from './user';
+import { AdminRoleController, AdminRoleService, AdminRoleEntity } from './role';
+import {
+  AdminUserRoleController,
+  AdminUserRoleService,
+  AdminUserRoleEntity,
+} from './user_role';
 export const getAddProviders = () => {
   return {
     Controllers: {
-      UserController,
+      AdminUserController,
+      AdminRoleController,
+      AdminUserRoleController,
     },
     Services: {
-      UserService,
+      AdminUserService,
+      AdminRoleService,
+      AdminUserRoleService,
     },
     Entities: {
-      UserEntity,
+      AdminUserEntity,
+      AdminRoleEntity,
+      AdminUserRoleEntity,
     },
   };
 };
 @Module({})
 export class AdminModule {
   static forRootAsync(param: Param): DynamicModule {
+    console.log(param);
     return {
       module: AdminModule,
       imports: param.imports,

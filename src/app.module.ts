@@ -13,6 +13,7 @@ console.log(Controllers, Services, Entities);
       database: 'data/test.db',
       entities: [...Object.values(Entities)],
       synchronize: true,
+      logging: true,
     }),
     AdminModule.forRootAsync({
       imports: [TypeOrmModule.forFeature(Object.values(Entities))],
@@ -24,4 +25,4 @@ console.log(Controllers, Services, Entities);
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

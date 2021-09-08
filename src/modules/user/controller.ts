@@ -1,18 +1,13 @@
 import { Controller, Get } from '@nestjs/common';
-import { WrapController } from 'nestjs-abstract-module';
-import { UserEntity } from './entity';
-import { UserService } from './service';
+import { WrapController } from '../../ab';
+import { AdminUserEntity } from './entity';
+import { AdminUserService } from './service';
 const CrudController = WrapController({
-  model: UserEntity,
+  model: AdminUserEntity,
 });
-@Controller('user')
-export class UserController extends CrudController {
-  constructor(readonly service: UserService) {
+@Controller('admin/user')
+export class AdminUserController extends CrudController {
+  constructor(readonly service: AdminUserService) {
     super(service);
-    console.log('install UserController');
-  }
-  @Get('ttt')
-  getttt() {
-    return this.service.findOne(1);
   }
 }
