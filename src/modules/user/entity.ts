@@ -5,7 +5,7 @@ import {
   ValueTransformer,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { AbstractTypeEntity } from '../../ab';
+import { AbstractTypeEntity } from 'nestjs-abstract-module';
 import { IsEmail, IsNotEmpty } from 'class-validator';
 
 const saltOrRounds = 10;

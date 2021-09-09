@@ -8,9 +8,20 @@ const { Controllers, Services, Entities } = getAddProviders();
 console.log(Controllers, Services, Entities);
 @Module({
   imports: [
+    // TypeOrmModule.forRoot({
+    //   type: 'sqlite',
+    //   database: 'data/test.db',
+    //   entities: [...Object.values(Entities)],
+    //   synchronize: true,
+    //   logging: true,
+    // }),
     TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'data/test.db',
+      type: 'mysql',
+      username: 'root',
+      host: '127.0.0.1',
+      port: 3306,
+      password: '5201314qv',
+      database: 'admin_test',
       entities: [...Object.values(Entities)],
       synchronize: true,
       logging: true,
@@ -25,4 +36,4 @@ console.log(Controllers, Services, Entities);
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

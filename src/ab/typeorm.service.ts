@@ -10,6 +10,7 @@ import {
   In,
   InsertResult,
   EntityTarget,
+  QueryFailedError,
 } from 'typeorm';
 export const sqlTransformMap = {
   gte: MoreThanOrEqual,
@@ -20,6 +21,7 @@ export const sqlTransformMap = {
   in: In,
 };
 export const cacheTable = {};
+
 /**
  * 标记是否基础查找时添加dtime=0
  */
@@ -40,6 +42,8 @@ export interface AbstractServiceExtraOptions {
    * page_size 默认为20
    */
   page_size?: number;
+
+  logger?: (args?: any) => void;
 }
 export interface FindAllQuery {
   page?: number;
@@ -65,6 +69,9 @@ const defaultOptions: AbstractServiceExtraOptions = {
   deleteAfterAction: 'log_time',
   log_sql_format: 'YYYY',
   page_size: 20,
+  logger: (message) => {
+    console.log(message);
+  }
 };
 export abstract class AbstractTypeOrmService<T> {
   protected _model: Repository<T>;
@@ -83,6 +90,7 @@ export abstract class AbstractTypeOrmService<T> {
       ...defaultOptions,
       ...options,
     });
+
   }
   public generatePaginationBuilder(
     builder: SelectQueryBuilder<T>,
@@ -223,8 +231,9 @@ export abstract class AbstractTypeOrmService<T> {
     try {
       const createBody = this._model.create(body);
       return await this._model.save(createBody);
-    } catch (error) {
-      throw error;
+    } catch (error: any) {
+      this.options.logger(error);
+      throw new BadRequestException(error.message || error.stack);
     }
   }
   public async update(id: number, body: any): Promise<T> {
@@ -234,7 +243,8 @@ export abstract class AbstractTypeOrmService<T> {
         return await this._model.save(Object.assign(entity, body));
       }
     } catch (error) {
-      throw error;
+      this.options.logger(error);
+      throw new BadRequestException(error.message || error.stack);
     }
   }
   public async findOne(id: number, query?: any): Promise<T | boolean> | never {
@@ -250,6 +260,7 @@ export abstract class AbstractTypeOrmService<T> {
       let result = await builder.getOneOrFail();
       return result;
     } catch (error) {
+      this.options.logger(error);
       throw new NotFoundException();
     }
   }
@@ -282,7 +293,8 @@ export abstract class AbstractTypeOrmService<T> {
         }
       }
     } catch (error) {
-      throw error;
+      this.options.logger(error);
+      throw new BadRequestException(error.message || error.stack);
     }
   }
   public async createColumnByDelete(data) {
