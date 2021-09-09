@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { WrapController } from '../../ab';
+import { WrapController } from 'nestjs-abstract-module';
 import { AdminRoleEntity } from './entity';
 import { AdminRoleService } from './service';
 const CrudController = WrapController({

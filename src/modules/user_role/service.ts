@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  AbstractServiceExtraOptions,
-  AbstractTypeOrmService,
-} from 'nestjs-abstract-module';
+import { AbstractServiceExtraOptions, AbstractTypeOrmService } from '../../ab';
 import { Repository } from 'typeorm';
 import { AdminUserRoleEntity } from './entity';
 @Injectable()
@@ -14,6 +11,9 @@ export class AdminUserRoleService extends AbstractTypeOrmService<AdminUserRoleEn
     readonly repository: Repository<AdminUserRoleEntity>, // entity,
   ) {
     super(repository, AdminUserRoleEntity);
-    this.options.findInjectDeleteWhere = false;
+    this.options = Object.assign({
+      ...this.options,
+      deleteAfterAction: 'normal',
+    });
   }
 }

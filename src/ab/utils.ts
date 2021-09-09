@@ -1,5 +1,5 @@
 export type Constructor = new (...args: any[]) => {};
-export const HocClass= <T extends Constructor, Y extends Constructor>(
+export const HocClass = <T extends Constructor, Y extends Constructor>(
   Base: T,
   ExtendClass: Y,
 ) => {

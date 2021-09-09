@@ -71,7 +71,7 @@ const defaultOptions: AbstractServiceExtraOptions = {
   page_size: 20,
   logger: (message) => {
     console.log(message);
-  }
+  },
 };
 export abstract class AbstractTypeOrmService<T> {
   protected _model: Repository<T>;
@@ -90,7 +90,6 @@ export abstract class AbstractTypeOrmService<T> {
       ...defaultOptions,
       ...options,
     });
-
   }
   public generatePaginationBuilder(
     builder: SelectQueryBuilder<T>,
@@ -197,7 +196,7 @@ export abstract class AbstractTypeOrmService<T> {
     query?: FindAllQuery,
   ): Promise<{ list: T[] } | IpaginationResult<T>> {
     try {
-      let builder = this.queryBuilder(query).andWhere('1=1');
+      const builder = this.queryBuilder(query).andWhere('1=1');
       if (
         this.options.findInjectDeleteWhere &&
         this.options.deleteAfterAction === 'log_time'
@@ -208,7 +207,7 @@ export abstract class AbstractTypeOrmService<T> {
         this.generatePaginationBuilder(builder, query);
       }
       if (query.needPage || (query.page && query.pageSize)) {
-        let [list, count] = await builder.getManyAndCount();
+        const [list, count] = await builder.getManyAndCount();
         return {
           list,
           pagination: {
@@ -218,7 +217,7 @@ export abstract class AbstractTypeOrmService<T> {
           },
         };
       } else {
-        let list = await builder.getMany();
+        const list = await builder.getMany();
         return {
           list,
         };
@@ -249,7 +248,7 @@ export abstract class AbstractTypeOrmService<T> {
   }
   public async findOne(id: number, query?: any): Promise<T | boolean> | never {
     try {
-      let builder = this.queryBuilder(query).andWhere('1=1');
+      const builder = this.queryBuilder(query).andWhere('1=1');
       builder.whereInIds(id);
       if (
         this.options.findInjectDeleteWhere &&
@@ -257,7 +256,7 @@ export abstract class AbstractTypeOrmService<T> {
       ) {
         this.addDeleteCondition(builder);
       }
-      let result = await builder.getOneOrFail();
+      const result = await builder.getOneOrFail();
       return result;
     } catch (error) {
       this.options.logger(error);
@@ -267,13 +266,13 @@ export abstract class AbstractTypeOrmService<T> {
   public async delete(id: number): Promise<any> {
     try {
       if (this.options.deleteAfterAction == 'log_sql') {
-        let result = await this.findOne(id);
+        const result = await this.findOne(id);
         await this._model.delete(result);
         this.deleteLogSql(result);
         return true;
       }
       if (this.options.deleteAfterAction == 'log_time') {
-        let result = await this.findOne(id);
+        const result = await this.findOne(id);
         if (result) {
           await this._model.update(id, {
             ...(result as any),
@@ -283,7 +282,7 @@ export abstract class AbstractTypeOrmService<T> {
         }
       }
       if (this.options.deleteAfterAction == 'normal') {
-        let result = await this.findOne(id);
+        const result = await this.findOne(id);
         if (result) {
           console.log('aaaa');
           await this._model.delete(id);
@@ -302,16 +301,20 @@ export abstract class AbstractTypeOrmService<T> {
       const mangager = this._model.manager;
       const table_name = this._entity.__delete_table__;
       if (data) {
-        await mangager
-          .createQueryBuilder()
-          .insert()
-          .into(table_name)
-          .values({
-            ...data,
-            dtime: ~~(+new Date() / 1000),
-          })
-          .execute();
-        // 成功后添加记录
+        try {
+          await mangager
+            .createQueryBuilder()
+            .insert()
+            .into(table_name)
+            .values({
+              ...data,
+              dtime: ~~(+new Date() / 1000),
+            })
+            .execute();
+          // 成功后添加记录
+        } catch (error) {
+          console.log(error);
+        }
       }
     }
   }
