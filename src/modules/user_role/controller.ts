@@ -5,7 +5,7 @@ import { AdminUserRoleService } from './service';
 const CrudController = WrapController({
   model: AdminUserRoleEntity,
 });
-@Controller('admin/user_role')
+@Controller('admin/userRole')
 export class AdminUserRoleController extends CrudController {
   constructor(readonly service: AdminUserRoleService) {
     super(service);

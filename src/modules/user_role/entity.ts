@@ -5,7 +5,7 @@ import { AdminUserEntity } from '../user';
 import { AdminRoleEntity } from '../role';
 
 @Entity('admin_user_role')
-export class AdminUserRoleEntity {
+export class AdminUserRoleEntity extends AbstractTypeEntity {
   static __delete_table__ = 'del_admin_user_role';
   @PrimaryGeneratedColumn()
   id: number;

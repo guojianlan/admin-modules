@@ -26,12 +26,15 @@ export class TransformerPassword implements ValueTransformer {
 }
 @Entity('admin_user')
 export class AdminUserEntity extends AbstractTypeEntity {
+  // 用户手机号
   @Column()
   mobile: string;
+  // 邮箱
   @IsNotEmpty()
   @IsEmail()
   @Column()
   email: string;
+  // 密码
   @IsNotEmpty()
   @Column({
     default: '',

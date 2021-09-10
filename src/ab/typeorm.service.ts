@@ -298,23 +298,32 @@ export abstract class AbstractTypeOrmService<T> {
   }
   public async createColumnByDelete(data) {
     if (this._entity?.__delete_table__) {
-      const mangager = this._model.manager;
-      const table_name = this._entity.__delete_table__;
-      if (data) {
-        try {
+      try {
+        const mangager = this._model.manager;
+        let result = false;
+        const del_table_name = this._entity.__delete_table__;
+        if (!cacheTable[del_table_name]) {
+          result = await mangager.query(
+            `CREATE TABLE if not exists ${del_table_name} like ${this._model.metadata.tableName};`,
+          );
+          cacheTable[del_table_name] = true;
+        } else {
+          result = true;
+        }
+        if (data && result) {
           await mangager
             .createQueryBuilder()
             .insert()
-            .into(table_name)
+            .into(del_table_name)
             .values({
               ...data,
               dtime: ~~(+new Date() / 1000),
             })
             .execute();
-          // 成功后添加记录
-        } catch (error) {
-          console.log(error);
         }
+        // 成功后添加记录
+      } catch (error) {
+        console.log(error);
       }
     }
   }

@@ -20,7 +20,7 @@ console.log(Controllers, Services, Entities);
       username: 'root',
       host: '127.0.0.1',
       port: 3306,
-      password: '123456',
+      password: '5201314qv',
       database: 'test1',
       entities: [...Object.values(Entities)],
       synchronize: true,
