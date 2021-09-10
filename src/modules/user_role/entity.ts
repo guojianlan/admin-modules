@@ -1,6 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { AbstractTypeEntity } from '../../ab';
-import { IsEmail } from 'class-validator';
 import { AdminUserEntity } from '../user';
 import { AdminRoleEntity } from '../role';
 
@@ -16,7 +15,9 @@ export class AdminUserRoleEntity extends AbstractTypeEntity {
   @Column()
   role_id: number;
 
+  // noinspection JSUnusedGlobalSymbols
   user: AdminUserEntity[];
 
+  // noinspection JSUnusedGlobalSymbols
   role: AdminRoleEntity[];
 }
