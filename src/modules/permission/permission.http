@@ -1,0 +1,14 @@
+### add permission
+POST http://127.0.0.1:3000/admin/permission
+Content-Type: application/json
+
+{
+  "name": "stati2c权限",
+  "uri": "/stat2c/123/1213"
+}
+
+### get_permissions
+GET http://127.0.0.1:3000/admin/permission
+Accept: application/json
+
+

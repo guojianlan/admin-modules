@@ -1,0 +1,14 @@
+### add menu
+POST http://127.0.0.1:3000/admin/menu
+Content-Type: application/json
+
+{
+  "name": "stati2c权限",
+  "url": "/stat2c/123/1213"
+}
+
+### get_menus
+GET http://127.0.0.1:3000/admin/menu
+Accept: application/json
+
+
