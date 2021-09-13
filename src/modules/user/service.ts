@@ -181,22 +181,19 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
   }
   public async getUserRole(user_id: number) {
     const builder = this.user_role_repository.createQueryBuilder('user_role');
-    builder.leftJoinAndMapOne(
-      'user_role.role',
+    builder.leftJoin(
+      // 'user_role.role',
       'admin_role',
       'role',
       'user_role.role_id = role.id',
     );
     // builder.select('role.name', 'user_role.name');
-    // builder.select(['user_role', 'role.name']);
-    builder.addSelect('role.name', 'user_role_role_name');
+    builder.select(['user_role.id as id', 'role.name as role_name']);
+
     builder.andWhere({
       user_id,
     });
-    const result = await builder.getMany();
-    // result.forEach((item) => {
-    //   item.role_name = item.role?.name;
-    // });
+    const result = await builder.getRawMany<AdminUserRoleEntity>();
     return result;
   }
 }
