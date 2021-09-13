@@ -82,10 +82,11 @@ export class AdminUserController
   }
 
   @Get(':user_id/role')
-  async getUserRole(
-    @Param('user_id') user_id: number,
-    @Body() body: SetUserRoleDto,
-  ) {
+  async getUserRole(@Param('user_id') user_id: number) {
     return await this.service.getUserRole(user_id);
+  }
+  @Get(':user_id/permission')
+  async getUserPermission(@Param('user_id') user_id: number) {
+    return await this.service.getUserPermission(user_id);
   }
 }

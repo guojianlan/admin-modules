@@ -12,3 +12,7 @@ GET http://127.0.0.1:3000/admin/role
 Accept: application/json
 
 
+
+### get_role_permission
+GET http://127.0.0.1:3000/admin/role/2/permission
+Accept: application/json

@@ -1,17 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  AbstractServiceExtraOptions,
-  AbstractTypeOrmService,
-} from 'nestjs-abstract-module';
+import { AbstractTypeOrmService } from 'nestjs-abstract-module';
 import { Repository } from 'typeorm';
 import { AdminRoleEntity } from './entity';
+import { AdminRolePermissionEntity } from '../role_permission';
+import { SetRolePermissionDto } from './dto';
 @Injectable()
 export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
   // entity: UserEntity;
   constructor(
     @InjectRepository(AdminRoleEntity)
     readonly repository: Repository<AdminRoleEntity>, // entity,
+    @InjectRepository(AdminRolePermissionEntity)
+    readonly role_permission_repository: Repository<AdminRolePermissionEntity>,
   ) {
     super(repository, AdminRoleEntity);
     this.options = Object.assign({
@@ -19,7 +20,50 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
       deleteAfterAction: 'normal',
     });
   }
-  ttt() {
-    console.log(AdminRoleEntity.__delete_table__);
+  public async isExistRole(id) {
+    return await this.findOne(id);
+  }
+  public async setRolePermission(role_id: number, body: SetRolePermissionDto) {
+    const user = await this.isExistRole(role_id);
+    if (user) {
+      //删除所有的permission,然后添加
+      await this.role_permission_repository.delete({ role_id });
+      const data = body.permission_ids.map((item) => ({
+        role_id: role_id,
+        permission_id: item,
+      }));
+      const entityData = this.role_permission_repository.create(data);
+      const resultData = await this.role_permission_repository.insert(
+        entityData,
+      );
+      if (!resultData) {
+        throw new BadRequestException('插入失败');
+      }
+      return true;
+    }
+    return false;
+  }
+  public async getRolePermission(role_id: number) {
+    const builder =
+      this.role_permission_repository.createQueryBuilder('role_permission');
+    builder.leftJoin(
+      // 'role_permission.permission',
+      'admin_permission',
+      'permission',
+      'role_permission.permission_id = permission.id',
+    );
+    builder.leftJoin('admin_role', 'role', 'role_permission.role_id = role.id');
+    builder.select([
+      'role_permission.id as id',
+      'role_permission.permission_id as permission_id',
+      'role_permission.role_id as role_id',
+      'permission.name as permission_name',
+      'role.name as role_name',
+    ]);
+    builder.andWhere({
+      role_id,
+    });
+    const result = await builder.getRawMany();
+    return result;
   }
 }

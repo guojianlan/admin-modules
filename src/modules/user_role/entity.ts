@@ -16,8 +16,11 @@ export class AdminUserRoleEntity extends AbstractTypeEntity {
   role_id: number;
 
   // noinspection JSUnusedGlobalSymbols
-  user: AdminUserEntity[];
+  user: AdminUserEntity;
 
   // noinspection JSUnusedGlobalSymbols
-  role: AdminRoleEntity[];
+  role: AdminRoleEntity;
+
+  // noinspection JSUnusedGlobalSymbols
+  role_name: string;
 }

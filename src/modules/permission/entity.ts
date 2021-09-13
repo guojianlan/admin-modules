@@ -25,4 +25,6 @@ export class AdminPermissionEntity extends AbstractTypeEntity {
     default: '',
   })
   description: string;
+
+  test: string;
 }
