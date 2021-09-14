@@ -4,7 +4,7 @@ import { AbstractTypeOrmService } from 'nestjs-abstract-module';
 import { Repository } from 'typeorm';
 import { AdminRoleEntity } from './entity';
 import { AdminRolePermissionEntity } from '../role_permission';
-import { SetRolePermissionDto } from './dto';
+import { SetRoleMenuDto, SetRolePermissionDto } from './dto';
 @Injectable()
 export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
   // entity: UserEntity;
@@ -65,5 +65,26 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
     });
     const result = await builder.getRawMany();
     return result;
+  }
+
+  public async setRoleMenu(role_id: number, body: SetRoleMenuDto) {
+    const user = await this.isExistRole(role_id);
+    if (user) {
+      //删除所有的permission,然后添加
+      await this.role_permission_repository.delete({ role_id });
+      const data = body.menu_ids.map((item) => ({
+        role_id: role_id,
+        menu_id: item,
+      }));
+      const entityData = this.role_permission_repository.create(data);
+      const resultData = await this.role_permission_repository.insert(
+        entityData,
+      );
+      if (!resultData) {
+        throw new BadRequestException('插入失败');
+      }
+      return true;
+    }
+    return false;
   }
 }

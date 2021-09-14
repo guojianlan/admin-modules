@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { WrapController } from 'nestjs-abstract-module';
 import { AdminRoleEntity } from './entity';
 import { AdminRoleService } from './service';
-import { SetRolePermissionDto } from './dto';
+import { SetRoleMenuDto, SetRolePermissionDto } from './dto';
 const CrudController = WrapController({
   model: AdminRoleEntity,
 });
@@ -23,5 +23,13 @@ export class AdminRoleController extends CrudController {
   @Get(':role_id/permission')
   async getRolePermission(@Param('role_id') role_id: number) {
     return await this.service.getRolePermission(role_id);
+  }
+  //设置角色菜单
+  @Post(':role_id/menu')
+  async setRoleMenu(
+    @Param('role_id') role_id: number,
+    @Body() body: SetRoleMenuDto,
+  ) {
+    return await this.service.setRoleMenu(role_id, body);
   }
 }

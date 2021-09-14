@@ -1,0 +1,12 @@
+### get_menus
+GET http://127.0.0.1:3000/admin/role_menu
+Accept: application/json
+
+### post
+POST http://127.0.0.1:3000/admin/role_menu
+Content-Type: application/json
+
+{
+  "role_id": "2",
+  "menu_id":2
+}
