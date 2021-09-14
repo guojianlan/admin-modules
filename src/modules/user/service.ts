@@ -190,9 +190,9 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
       'role',
       'user_role.role_id = role.id',
     );
-
-    builder.select(['role.*']);
-
+    // builder.select('role.name', 'user_role.name');
+    // builder.select(['user_role', 'role.name']);
+    builder.addSelect('role.name', 'user_role_role_name');
     builder.andWhere({
       user_id,
     });

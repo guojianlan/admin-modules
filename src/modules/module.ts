@@ -18,6 +18,11 @@ import {
   AdminRolePermissionService,
   AdminRolePermissionEntity,
 } from './role_permission';
+import {
+  AdminRoleMenuController,
+  AdminRoleMenuService,
+  AdminRoleMenuEntity,
+} from './role_menu';
 import { AdminMenuController, AdminMenuService, AdminMenuEntity } from './menu';
 export const getAddProviders = () => {
   return {
@@ -25,19 +30,19 @@ export const getAddProviders = () => {
       AdminUserRoleController,
       AdminUserController,
       AdminRoleController,
-
       AdminPermissionController,
       AdminRolePermissionController,
       AdminMenuController,
+      AdminRoleMenuController,
     },
     Services: {
       AdminUserRoleService,
       AdminUserService,
       AdminRoleService,
-
       AdminPermissionService,
       AdminRolePermissionService,
       AdminMenuService,
+      AdminRoleMenuService,
     },
     Entities: {
       AdminUserRoleEntity,
@@ -46,6 +51,7 @@ export const getAddProviders = () => {
       AdminRoleEntity,
       AdminRolePermissionEntity,
       AdminMenuEntity,
+      AdminRoleMenuEntity,
     },
   };
 };

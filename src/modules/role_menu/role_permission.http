@@ -1,0 +1,14 @@
+### add rolePermission
+POST http://127.0.0.1:3000/admin/role_menu
+Content-Type: application/json
+
+{
+  "role_id": "2",
+  "permission_id": "3"
+}
+
+### get_rolePermission
+GET http://127.0.0.1:3000/admin//role_menu
+Accept: application/json
+
+
