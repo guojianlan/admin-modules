@@ -30,7 +30,7 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
   public async setRolePermission(role_id: number, body: SetRolePermissionDto) {
     const user = await this.isExistRole(role_id);
     if (user) {
-      //删除所有的permission,然后添加
+      //删除所有的permission,然后添加212313
       await this.role_permission_repository.delete({ role_id });
       AdminStore.setCaches(`role_permission_${role_id}`, null);
       const data = body.permission_ids.map((item) => ({
