@@ -85,8 +85,14 @@ export class AdminUserController
   async getUserRole(@Param('user_id') user_id: number) {
     return await this.service.getUserRole(user_id);
   }
+  //获取用户权限
   @Get(':user_id/permission')
   async getUserPermission(@Param('user_id') user_id: number) {
     return await this.service.getUserPermission(user_id);
+  }
+  //获取用户菜单
+  @Get(':user_id/menu')
+  async getUserMenu(@Param('user_id') user_id: number) {
+    return await this.service.getUserMenu(user_id);
   }
 }

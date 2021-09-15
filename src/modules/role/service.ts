@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { AdminRoleEntity } from './entity';
 import { AdminRolePermissionEntity } from '../role_permission';
 import { SetRoleMenuDto, SetRolePermissionDto } from './dto';
+import { AdminRoleMenuEntity } from '../role_menu';
 @Injectable()
 export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
   // entity: UserEntity;
@@ -13,6 +14,8 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
     readonly repository: Repository<AdminRoleEntity>, // entity,
     @InjectRepository(AdminRolePermissionEntity)
     readonly role_permission_repository: Repository<AdminRolePermissionEntity>,
+    @InjectRepository(AdminRoleMenuEntity)
+    readonly role_menu_repository: Repository<AdminRoleMenuEntity>,
   ) {
     super(repository, AdminRoleEntity);
     this.options = Object.assign({
@@ -69,21 +72,29 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
   public async setRoleMenu(role_id: number, body: SetRoleMenuDto) {
     const user = await this.isExistRole(role_id);
     if (user) {
-      //删除所有的permission,然后添加
-      await this.role_permission_repository.delete({ role_id });
+      //删除所有的menu,然后添加
+      await this.role_menu_repository.delete({ role_id });
       const data = body.menu_ids.map((item) => ({
         role_id: role_id,
         menu_id: item,
       }));
-      const entityData = this.role_permission_repository.create(data);
-      const resultData = await this.role_permission_repository.insert(
-        entityData,
-      );
+      const entityData = this.role_menu_repository.create(data);
+      const resultData = await this.role_menu_repository.insert(entityData);
       if (!resultData) {
         throw new BadRequestException('插入失败');
       }
       return true;
     }
     return false;
+  }
+  public async getRoleMenu(role_id: number) {
+    const builder = this.role_menu_repository.createQueryBuilder('role_menu');
+    builder.leftJoin('admin_menu', 'menu', 'role_menu.menu_id = menu.id');
+    builder.select(['menu.*']);
+    builder.andWhere({
+      role_id,
+    });
+    const result = await builder.getRawMany();
+    return result;
   }
 }

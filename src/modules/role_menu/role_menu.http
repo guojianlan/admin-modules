@@ -8,5 +8,5 @@ Content-Type: application/json
 
 {
   "role_id": "2",
-  "menu_id":2
+  "menu_id":1
 }

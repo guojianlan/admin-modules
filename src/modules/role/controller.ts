@@ -19,7 +19,7 @@ export class AdminRoleController extends CrudController {
   ) {
     return await this.service.setRolePermission(role_id, body);
   }
-  //设置角色权限
+  //获取角色权限
   @Get(':role_id/permission')
   async getRolePermission(@Param('role_id') role_id: number) {
     return await this.service.getRolePermission(role_id);
@@ -31,5 +31,10 @@ export class AdminRoleController extends CrudController {
     @Body() body: SetRoleMenuDto,
   ) {
     return await this.service.setRoleMenu(role_id, body);
+  }
+  //获取角色菜单权限
+  @Get(':role_id/menu')
+  async getRoleMenu(@Param('role_id') role_id: number) {
+    return await this.service.getRoleMenu(role_id);
   }
 }

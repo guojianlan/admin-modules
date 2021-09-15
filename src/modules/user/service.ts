@@ -192,7 +192,8 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
     );
     // builder.select('role.name', 'user_role.name');
     // builder.select(['user_role', 'role.name']);
-    builder.addSelect('role.name', 'user_role_role_name');
+    builder.select('role.*');
+    builder.groupBy('id');
     builder.andWhere({
       user_id,
     });
@@ -200,7 +201,7 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
     return result;
   }
   public async getUserPermission(user_id: number) {
-    const user = this.isExistUser(user_id);
+    const user = await this.isExistUser(user_id);
     if (user) {
       const builder = this.user_role_repository.createQueryBuilder('user_role');
       builder.leftJoin(
@@ -213,10 +214,6 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
         'permission',
         'permission.id = role_permission.permission_id',
       );
-      builder.where({
-        user_id,
-      });
-      console.log();
       const field = [];
       Object.values(this.permission_repository.metadata.propertiesMap).forEach(
         (item) => {
@@ -224,6 +221,32 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
         },
       );
       builder.select([...field]);
+      builder.where({
+        user_id,
+      });
+      builder.andWhere('permission.id is not null');
+      builder.groupBy('id');
+      const result = await builder.getRawMany();
+      return result;
+    }
+    return [];
+  }
+  public async getUserMenu(user_id: number) {
+    const user = await this.isExistUser(user_id);
+    if (user) {
+      const builder = this.user_role_repository.createQueryBuilder('user_role');
+      builder.leftJoin(
+        'admin_role_menu',
+        'role_menu',
+        'role_menu.role_id = user_role.role_id',
+      );
+      builder.leftJoin('admin_menu', 'menu', 'menu.id = role_menu.menu_id');
+      const field = [];
+      builder.select(['menu.*']);
+      builder.where({
+        user_id,
+      });
+      builder.andWhere('menu.id is not null');
       builder.groupBy('id');
       const result = await builder.getRawMany();
       return result;
