@@ -6,6 +6,7 @@ import { AdminRoleEntity } from './entity';
 import { AdminRolePermissionEntity } from '../role_permission';
 import { SetRoleMenuDto, SetRolePermissionDto } from './dto';
 import { AdminRoleMenuEntity } from '../role_menu';
+import { AdminStore } from '../global.var';
 @Injectable()
 export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
   // entity: UserEntity;
@@ -31,22 +32,26 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
     if (user) {
       //删除所有的permission,然后添加
       await this.role_permission_repository.delete({ role_id });
+      AdminStore.setCaches(`role_permission_${role_id}`, null);
       const data = body.permission_ids.map((item) => ({
         role_id: role_id,
         permission_id: item,
       }));
       const entityData = this.role_permission_repository.create(data);
-      const resultData = await this.role_permission_repository.insert(
-        entityData,
-      );
+      const resultData = await this.role_permission_repository.save(entityData);
       if (!resultData) {
         throw new BadRequestException('插入失败');
       }
+      AdminStore.setCaches(
+        `role_permission_${role_id}`,
+        JSON.stringify(resultData.map((item) => item.permission_id)),
+      );
       return true;
     }
     return false;
   }
   public async getRolePermission(role_id: number) {
+    console.log(AdminStore.getCaches(`'role_permission_${role_id}`));
     const builder =
       this.role_permission_repository.createQueryBuilder('role_permission');
     builder.leftJoin(
