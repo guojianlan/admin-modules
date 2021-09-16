@@ -1,3 +1,5 @@
+import { IJwtOptions } from './types';
+
 export const captchaList = {};
 
 export class AdminStore {
@@ -7,5 +9,18 @@ export class AdminStore {
   }
   static setCaches(key: string, value: any) {
     AdminStore.caches[key] = value;
+  }
+}
+export class JwtOptions {
+  static options: IJwtOptions = {
+    secret: 'asdhij',
+  };
+  static getOptions() {
+    return JwtOptions.options;
+  }
+  static setOptions(data: IJwtOptions) {
+    if (data) {
+      JwtOptions.options = data;
+    }
   }
 }

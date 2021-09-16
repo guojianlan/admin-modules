@@ -13,10 +13,12 @@ import { isEmail } from 'class-validator';
 import * as svgCaptcha from 'svg-captcha';
 import * as bcrypt from 'bcrypt';
 import { parse } from 'querystring';
-import { captchaList } from '../global.var';
+import { captchaList, JwtOptions } from '../global.var';
 import { Request } from 'express';
 import { AdminUserRoleEntity } from '../user_role';
 import { AdminPermissionEntity } from '../permission';
+import * as jwt from 'jsonwebtoken';
+import { plainToClass } from 'class-transformer';
 @Injectable()
 export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
   // entity: UserEntity;
@@ -79,7 +81,7 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
     return this.__registerByEmail(body);
   }
   public async loginByUsername(body: LoginByUserNameDto) {
-    return this.__loginByUsername(body);
+    return await this.__loginByUsername(body);
   }
   public async __loginByUsername(body: LoginByUserNameDto) {
     const builder = this.queryBuilder();
@@ -97,7 +99,8 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
       throw new BadRequestException('用户名或密码错误');
     }
     delete user.password;
-    return user;
+    const token = jwt.sign({ ...user }, JwtOptions.getOptions().secret);
+    return token;
     return body;
   }
   public async registerByUserName(body: RegisterByUserNameDto) {
@@ -141,6 +144,13 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
       height: 40,
     });
     captcha.text = bcrypt.hashSync(captcha.text.toLocaleLowerCase(), 8);
+    console.log(JwtOptions.getOptions().secret);
+    // console.log(
+    //   jwt.verify(
+    //     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NywiY3RpbWUiOjE2MzEyOTEwMzcsIm10aW1lIjoxNjMxMjkxMDM3LCJkdGltZSI6MCwibW9iaWxlIjoiMTU5MjAxMTI4NjEiLCJlbWFpbCI6IjQyNDEyMjIzOTc3MjI3QHFxLmNvbSIsImlhdCI6MTYzMTc1MjQzNX0.jnKy6qyahqYivWYcIlkbd05xzm_jCeIUFOWoSLdw9kc',
+    //     JwtOptions.getOptions().secret,
+    //   ),
+    // );
     return captcha;
   }
   public async validateCaptcha(code: string, hash: string): Promise<boolean> {

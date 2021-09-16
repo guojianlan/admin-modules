@@ -1,5 +1,6 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import { Param } from './types';
+import { JwtOptions } from './global.var';
 import { AdminUserController, AdminUserService, AdminUserEntity } from './user';
 import { AdminRoleController, AdminRoleService, AdminRoleEntity } from './role';
 import {
@@ -59,6 +60,7 @@ export const getAddProviders = () => {
 @Module({})
 export class AdminModule {
   static forRootAsync(param: Param): DynamicModule {
+    JwtOptions.setOptions(param.jwtOptions);
     return {
       module: AdminModule,
       imports: param.imports,
