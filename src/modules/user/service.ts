@@ -33,6 +33,7 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
     super(repository, AdminUserEntity, {
       deleteAfterAction: 'log_sql',
     });
+    console.log('installer........');
   }
   public async __loginByEmail(body: LoginByEmailDto) {
     //判断邮箱是否存在
@@ -99,8 +100,7 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
       throw new BadRequestException('用户名或密码错误');
     }
     delete user.password;
-    const token = jwt.sign({ ...user }, JwtOptions.getOptions().secret);
-    return token;
+    return user;
     return body;
   }
   public async registerByUserName(body: RegisterByUserNameDto) {
@@ -262,5 +262,16 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
       return result;
     }
     return [];
+  }
+  public async generateJWT(data: any) {
+    const payload = Object.assign({}, data);
+    const token = jwt.sign(payload, JwtOptions.getOptions().secret);
+    return token;
+  }
+  public async verifyJWT(token) {
+    return jwt.verify(
+      token,
+      JwtOptions.getOptions().secret,
+    ) as unknown as AdminUserEntity;
   }
 }

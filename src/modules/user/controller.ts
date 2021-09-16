@@ -7,6 +7,7 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { WrapController } from 'nestjs-abstract-module';
 import { AdminUserEntity } from './entity';
@@ -20,9 +21,11 @@ import {
   SetUserRoleDto,
 } from './dto';
 import { Request, Response } from 'express';
-import { captchaList } from '../global.var';
+import { captchaList, JwtOptions } from '../global.var';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as jwt from 'jsonwebtoken';
+import { AuthGuard } from '../guards';
 const CrudController = WrapController({
   model: AdminUserEntity,
 });
@@ -51,7 +54,9 @@ export class AdminUserController
   @Post('loginByUserName')
   async loginByUsername(@Body() body: LoginByUserNameDto, @Req() req: Request) {
     await this.service.checkCode(body.code, req);
-    return this.service.loginByUsername(body);
+    const user = await this.service.loginByUsername(body);
+    const token = await this.service.generateJWT(user);
+    return token;
   }
   @Post('registerByUserName')
   async registerByUserName(
@@ -73,6 +78,7 @@ export class AdminUserController
     return captcha.data;
   }
   //设置用户角色
+
   @Post(':user_id/role')
   async setUserRole(
     @Param('user_id') user_id: number,
@@ -80,7 +86,7 @@ export class AdminUserController
   ) {
     return await this.service.setUserRole(user_id, body);
   }
-
+  @UseGuards(AuthGuard)
   @Get(':user_id/role')
   async getUserRole(@Param('user_id') user_id: number) {
     return await this.service.getUserRole(user_id);

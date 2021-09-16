@@ -45,4 +45,8 @@ export class AdminUserEntity extends AbstractTypeEntity {
     transformer: new TransformerPassword(),
   })
   password: string;
+  @Column({
+    default: false,
+  })
+  is_super: boolean;
 }

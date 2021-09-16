@@ -25,6 +25,7 @@ import {
   AdminRoleMenuEntity,
 } from './role_menu';
 import { AdminMenuController, AdminMenuService, AdminMenuEntity } from './menu';
+import { AuthGuard } from './guards';
 export const getAddProviders = () => {
   return {
     Controllers: {
@@ -56,6 +57,7 @@ export const getAddProviders = () => {
     },
   };
 };
+
 @Global()
 @Module({})
 export class AdminModule {
@@ -63,9 +65,9 @@ export class AdminModule {
     JwtOptions.setOptions(param.jwtOptions);
     return {
       module: AdminModule,
-      imports: param.imports,
-      controllers: param && param.controllers,
-      providers: param && param.providers,
+      imports: [...param.imports],
+      controllers: [...(param && param.controllers)],
+      providers: [...(param && param.providers)],
       exports: [...param?.providers, ...param?.imports],
     };
   }
