@@ -3,12 +3,14 @@ import { WrapController } from '../../ab';
 import { AdminPermissionEntity } from './entity';
 import { AdminPermissionService } from './service';
 import { AuthPermissionGuard } from '../decorators';
+import { myEmitterInstalled } from '../global.var';
 
 const CrudController = WrapController({
   model: AdminPermissionEntity,
   afterFunctions: {
     update: function (result) {
-      console.log((this as any).service);
+      console.log(result);
+      myEmitterInstalled.emit('permission_update', result.id);
       return result;
     },
   },

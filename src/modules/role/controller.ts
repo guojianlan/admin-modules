@@ -5,8 +5,16 @@ import { AdminRoleService } from './service';
 import { SetRoleMenuDto, SetRolePermissionDto } from './dto';
 import { AuthPermissionGuard } from '../decorators';
 import { PublicGuard } from '../decorators/piblic_guard';
+import { myEmitterInstalled } from '../global.var';
 const CrudController = WrapController({
   model: AdminRoleEntity,
+  afterFunctions: {
+    update: function (result) {
+      console.log(result, 2222);
+      myEmitterInstalled.emit('permission_update', result.id);
+      return result;
+    },
+  },
 });
 @AuthPermissionGuard()
 @Controller('admin/role')

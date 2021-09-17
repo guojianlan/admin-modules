@@ -111,7 +111,8 @@ export function WrapController<T>(options: AbstractControllerOptions<T>): any {
       let result = await this._service.update(id, body);
       if (options?.afterFunctions?.update) {
         console.log('111111');
-        result = await options?.afterFunctions?.update.apply(this, result);
+
+        result = await options?.afterFunctions?.update.apply(this, [result]);
       }
       return {
         data: result,

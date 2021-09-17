@@ -1,14 +1,17 @@
 import { Column, Entity } from 'typeorm';
 import { AbstractTypeEntity } from 'nestjs-abstract-module';
 import { RequestMethods } from '../types';
+import { IsNotEmpty } from 'class-validator';
 
 @Entity('admin_permission')
 export class AdminPermissionEntity extends AbstractTypeEntity {
   static __delete_table__ = 'del_admin_permission';
   // 权限名称
+  @IsNotEmpty()
   @Column()
   name: string;
 
+  @IsNotEmpty()
   @Column({
     type: 'enum',
     comment: 'url方法',
@@ -26,6 +29,4 @@ export class AdminPermissionEntity extends AbstractTypeEntity {
     default: '',
   })
   description: string;
-
-  test: string;
 }

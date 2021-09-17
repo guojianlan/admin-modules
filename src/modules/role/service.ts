@@ -6,7 +6,7 @@ import { AdminRoleEntity } from './entity';
 import { AdminRolePermissionEntity } from '../role_permission';
 import { SetRoleMenuDto, SetRolePermissionDto } from './dto';
 import { AdminRoleMenuEntity } from '../role_menu';
-import { AdminStore } from '../global.var';
+import { AdminStore, myEmitterInstalled } from '../global.var';
 @Injectable()
 export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
   // entity: UserEntity;
@@ -22,6 +22,10 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
     this.options = Object.assign({
       ...this.options,
       deleteAfterAction: 'normal',
+    });
+    myEmitterInstalled.on('permission_update', (data) => {
+      console.log(12313);
+      this.updateCacheByPermission(data);
     });
   }
   public async isExistRole(id) {
@@ -104,6 +108,7 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
   public async updateCacheByPermission(permission_id: number) {
     //通过权限id找到所有的role_id,
     // 然后使用找到所有的role_id，拿出来字符串，找到信息，替换，不用经过sql。
-    console.log('afterFunctions');
+    console.log(permission_id);
+    console.log('updateCacheByPermission');
   }
 }

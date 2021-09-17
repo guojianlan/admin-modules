@@ -1,5 +1,5 @@
 import { IJwtOptions } from './types';
-
+import * as EventEmitter from 'events';
 export const captchaList = {};
 
 export class AdminStore {
@@ -24,3 +24,7 @@ export class JwtOptions {
     }
   }
 }
+
+class MyEmitter extends EventEmitter {}
+
+export const myEmitterInstalled = new MyEmitter();
