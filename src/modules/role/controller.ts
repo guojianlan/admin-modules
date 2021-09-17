@@ -1,11 +1,14 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { WrapController } from 'nestjs-abstract-module';
 import { AdminRoleEntity } from './entity';
 import { AdminRoleService } from './service';
 import { SetRoleMenuDto, SetRolePermissionDto } from './dto';
+import { AuthPermissionGuard } from '../decorators';
+import { PublicGuard } from '../decorators/piblic_guard';
 const CrudController = WrapController({
   model: AdminRoleEntity,
 });
+@AuthPermissionGuard()
 @Controller('admin/role')
 export class AdminRoleController extends CrudController {
   constructor(readonly service: AdminRoleService) {

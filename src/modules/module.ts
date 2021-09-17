@@ -25,7 +25,6 @@ import {
   AdminRoleMenuEntity,
 } from './role_menu';
 import { AdminMenuController, AdminMenuService, AdminMenuEntity } from './menu';
-import { AuthGuard } from './guards';
 export const getAddProviders = () => {
   return {
     Controllers: {

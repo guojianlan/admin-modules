@@ -1,6 +1,7 @@
 import { Column, Entity } from 'typeorm';
 import { AbstractTypeEntity } from 'nestjs-abstract-module';
-import { RequestMethod } from '@nestjs/common';
+import { RequestMethods } from '../types';
+
 @Entity('admin_permission')
 export class AdminPermissionEntity extends AbstractTypeEntity {
   static __delete_table__ = 'del_admin_permission';
@@ -11,8 +12,8 @@ export class AdminPermissionEntity extends AbstractTypeEntity {
   @Column({
     type: 'enum',
     comment: 'url方法',
-    enum: RequestMethod,
-    default: RequestMethod.GET,
+    enum: RequestMethods,
+    default: RequestMethods.GET,
   })
   method: string;
 

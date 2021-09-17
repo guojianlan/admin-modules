@@ -204,9 +204,10 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
     // builder.select(['user_role', 'role.name']);
     builder.select('role.*');
     builder.groupBy('id');
-    builder.andWhere({
+    builder.where({
       user_id,
     });
+    builder.andWhere('role.id > 0');
     const result = await builder.getRawMany<AdminUserRoleEntity>();
     return result;
   }
@@ -234,9 +235,9 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
       builder.where({
         user_id,
       });
-      builder.andWhere('permission.id is not null');
+      builder.andWhere('permission.id > 0');
       builder.groupBy('id');
-      const result = await builder.getRawMany();
+      const result = (await builder.getRawMany()) as AdminPermissionEntity[];
       return result;
     }
     return [];

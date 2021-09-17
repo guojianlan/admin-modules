@@ -1,18 +1,7 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
 import { WrapController } from 'nestjs-abstract-module';
 import { AdminUserEntity } from './entity';
 import { AdminUserService } from './service';
-import { AdminUserRoleEntity } from '../user_role';
 import {
   LoginByEmailDto,
   LoginByUserNameDto,
@@ -21,11 +10,8 @@ import {
   SetUserRoleDto,
 } from './dto';
 import { Request, Response } from 'express';
-import { captchaList, JwtOptions } from '../global.var';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import * as jwt from 'jsonwebtoken';
-import { AuthGuard } from '../guards';
+import { captchaList } from '../global.var';
+import { AuthPermissionGuard, PublicDecorator } from '../decorators';
 const CrudController = WrapController({
   model: AdminUserEntity,
 });
@@ -33,6 +19,7 @@ export interface AdminUserControllerImplements {
   loginByUsername: (body: any, ...args: any[]) => any;
   registerByUserName: (body: any, ...args: any[]) => any;
 }
+@AuthPermissionGuard()
 @Controller('admin/user')
 export class AdminUserController
   extends CrudController
@@ -52,6 +39,7 @@ export class AdminUserController
     return this.service.registerByEmail(body);
   }
   @Post('loginByUserName')
+  @PublicDecorator()
   async loginByUsername(@Body() body: LoginByUserNameDto, @Req() req: Request) {
     await this.service.checkCode(body.code, req);
     const user = await this.service.loginByUsername(body);
@@ -67,6 +55,7 @@ export class AdminUserController
     return this.service.registerByUserName(body);
   }
   @Get('getCaptcha')
+  @PublicDecorator()
   async getCaptcha(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
@@ -78,7 +67,7 @@ export class AdminUserController
     return captcha.data;
   }
   //设置用户角色
-
+  @AuthPermissionGuard()
   @Post(':user_id/role')
   async setUserRole(
     @Param('user_id') user_id: number,
@@ -86,17 +75,20 @@ export class AdminUserController
   ) {
     return await this.service.setUserRole(user_id, body);
   }
-  @UseGuards(AuthGuard)
+  @AuthPermissionGuard()
   @Get(':user_id/role')
   async getUserRole(@Param('user_id') user_id: number) {
     return await this.service.getUserRole(user_id);
   }
   //获取用户权限
+  @AuthPermissionGuard()
   @Get(':user_id/permission')
   async getUserPermission(@Param('user_id') user_id: number) {
     return await this.service.getUserPermission(user_id);
   }
+
   //获取用户菜单
+  @AuthPermissionGuard()
   @Get(':user_id/menu')
   async getUserMenu(@Param('user_id') user_id: number) {
     return await this.service.getUserMenu(user_id);

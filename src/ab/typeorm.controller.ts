@@ -110,7 +110,8 @@ export function WrapController<T>(options: AbstractControllerOptions<T>): any {
     public async update(@Param() id: number, @Body() body: updateDto) {
       let result = await this._service.update(id, body);
       if (options?.afterFunctions?.update) {
-        result = await options?.afterFunctions?.update(result);
+        console.log('111111');
+        result = await options?.afterFunctions?.update.apply(this, result);
       }
       return {
         data: result,

@@ -30,7 +30,7 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
   public async setRolePermission(role_id: number, body: SetRolePermissionDto) {
     const user = await this.isExistRole(role_id);
     if (user) {
-      //删除所有的permission,然后添加212313
+      //删除所有的permission,然后添加
       await this.role_permission_repository.delete({ role_id });
       AdminStore.setCaches(`role_permission_${role_id}`, null);
       const data = body.permission_ids.map((item) => ({
@@ -42,16 +42,20 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
       if (!resultData) {
         throw new BadRequestException('插入失败');
       }
+      //获取设置的权限，
+      const result = await this.getRolePermission(role_id);
       AdminStore.setCaches(
         `role_permission_${role_id}`,
-        JSON.stringify(resultData.map((item) => item.permission_id)),
+        result ? JSON.stringify(result) : undefined,
       );
       return true;
     }
     return false;
   }
   public async getRolePermission(role_id: number) {
-    console.log(AdminStore.getCaches(`'role_permission_${role_id}`));
+    if (AdminStore.getCaches(`role_permission_${role_id}`)) {
+      return JSON.parse(AdminStore.getCaches(`role_permission_${role_id}`));
+    }
     const builder =
       this.role_permission_repository.createQueryBuilder('role_permission');
     builder.leftJoin(
@@ -61,16 +65,11 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
       'role_permission.permission_id = permission.id',
     );
     builder.leftJoin('admin_role', 'role', 'role_permission.role_id = role.id');
-    builder.select([
-      'role_permission.id as id',
-      'role_permission.permission_id as permission_id',
-      'role_permission.role_id as role_id',
-      'permission.name as permission_name',
-      'role.name as role_name',
-    ]);
-    builder.andWhere({
+    builder.select(['permission.*']);
+    builder.where({
       role_id,
     });
+    builder.andWhere('permission.id > 0');
     const result = await builder.getRawMany();
     return result;
   }
@@ -101,5 +100,10 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
     });
     const result = await builder.getRawMany();
     return result;
+  }
+  public async updateCacheByPermission(permission_id: number) {
+    //通过权限id找到所有的role_id,
+    // 然后使用找到所有的role_id，拿出来字符串，找到信息，替换，不用经过sql。
+    console.log('afterFunctions');
   }
 }
