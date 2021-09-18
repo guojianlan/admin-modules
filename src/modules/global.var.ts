@@ -10,6 +10,9 @@ export class AdminStore {
   static setCaches(key: string, value: any) {
     AdminStore.caches[key] = value;
   }
+  static getAllCaches() {
+    return AdminStore.caches;
+  }
 }
 export class JwtOptions {
   static options: IJwtOptions = {

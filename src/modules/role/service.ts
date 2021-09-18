@@ -24,8 +24,10 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
       deleteAfterAction: 'normal',
     });
     myEmitterInstalled.on('permission_update', (data) => {
-      console.log(12313);
       this.updateCacheByPermission(data);
+    });
+    myEmitterInstalled.on('menu_update', (data) => {
+      this.updateCacheByMenu(data);
     });
   }
   public async isExistRole(id) {
@@ -48,10 +50,12 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
       }
       //获取设置的权限，
       const result = await this.getRolePermission(role_id);
-      AdminStore.setCaches(
-        `role_permission_${role_id}`,
-        result ? JSON.stringify(result) : undefined,
-      );
+      if (result) {
+        AdminStore.setCaches(
+          `role_permission_${role_id}`,
+          result ? JSON.stringify(result) : undefined,
+        );
+      }
       return true;
     }
     return false;
@@ -63,7 +67,6 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
     const builder =
       this.role_permission_repository.createQueryBuilder('role_permission');
     builder.leftJoin(
-      // 'role_permission.permission',
       'admin_permission',
       'permission',
       'role_permission.permission_id = permission.id',
@@ -75,6 +78,13 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
     });
     builder.andWhere('permission.id > 0');
     const result = await builder.getRawMany();
+    if (result) {
+      AdminStore.setCaches(
+        `role_permission_${role_id}`,
+        JSON.stringify(result),
+      );
+    }
+
     return result;
   }
   public async setRoleMenu(role_id: number, body: SetRoleMenuDto) {
@@ -82,6 +92,7 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
     if (user) {
       //删除所有的menu,然后添加
       await this.role_menu_repository.delete({ role_id });
+      AdminStore.setCaches(`role_menu_${role_id}`, null);
       const data = body.menu_ids.map((item) => ({
         role_id: role_id,
         menu_id: item,
@@ -91,24 +102,58 @@ export class AdminRoleService extends AbstractTypeOrmService<AdminRoleEntity> {
       if (!resultData) {
         throw new BadRequestException('插入失败');
       }
+      await this.getRoleMenu(role_id);
       return true;
     }
     return false;
   }
   public async getRoleMenu(role_id: number) {
+    if (AdminStore.getCaches(`role_menu_${role_id}`)) {
+      return JSON.parse(AdminStore.getCaches(`role_menu_${role_id}`));
+    }
     const builder = this.role_menu_repository.createQueryBuilder('role_menu');
     builder.leftJoin('admin_menu', 'menu', 'role_menu.menu_id = menu.id');
     builder.select(['menu.*']);
-    builder.andWhere({
+    builder.where({
       role_id,
     });
+    builder.andWhere('menu.id > 0');
     const result = await builder.getRawMany();
+    if (result) {
+      AdminStore.setCaches(`role_menu_${role_id}`, JSON.stringify(result));
+    }
     return result;
   }
-  public async updateCacheByPermission(permission_id: number) {
+  public async updateCacheByPermission(permission: any) {
     //通过权限id找到所有的role_id,
     // 然后使用找到所有的role_id，拿出来字符串，找到信息，替换，不用经过sql。
-    console.log(permission_id);
-    console.log('updateCacheByPermission');
+    const builder =
+      this.role_permission_repository.createQueryBuilder('role_permission');
+    builder.where({
+      permission_id: permission.id,
+    });
+    const result = await builder.getMany();
+    if (result) {
+      const ids = result.map((item) => item.role_id);
+      const filter = new Set([...ids]);
+      filter.forEach((item) => {
+        const caches = AdminStore.getCaches(`role_permission_${item}`);
+        if (caches) {
+          const to_object = JSON.parse(caches);
+          const findIndex = to_object.findIndex(
+            (item) => item.id == permission.id,
+          );
+          const copyValue = to_object[findIndex];
+          to_object[findIndex] = Object.assign({}, copyValue, permission);
+          AdminStore.setCaches(
+            `role_permission_${item}`,
+            JSON.stringify(to_object),
+          );
+        }
+      });
+    }
+  }
+  public async updateCacheByMenu(data: any) {
+    console.log('updateCacheByMenu', data);
   }
 }

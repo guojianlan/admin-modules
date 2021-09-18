@@ -9,8 +9,7 @@ const CrudController = WrapController({
   model: AdminPermissionEntity,
   afterFunctions: {
     update: function (result) {
-      console.log(result);
-      myEmitterInstalled.emit('permission_update', result.id);
+      myEmitterInstalled.emit('permission_update', result);
       return result;
     },
   },

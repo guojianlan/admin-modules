@@ -8,6 +8,7 @@ import {
 } from './typeorm.service';
 import { PartialType } from '@nestjs/mapped-types';
 import { generate, Observable, map, from } from 'rxjs';
+import { InsertResult } from 'typeorm';
 export interface IDecorators {
   findAll?: Array<MethodDecorator | PropertyDecorator>;
   findOne?: Array<MethodDecorator | PropertyDecorator>;
@@ -16,11 +17,11 @@ export interface IDecorators {
   delete?: Array<MethodDecorator | PropertyDecorator>;
 }
 export interface IAfterFn {
-  findAll?: <T>(result: any) => T;
-  findOne?: <T>(result: any) => T;
-  create?: <T>(result: any) => T;
-  update?: <T>(result: any) => T;
-  delete?: <T>(result: any) => T;
+  findAll?: <T>(this: IAbstractController<T>, result: any) => Promise<T>;
+  findOne?: <T>(this: IAbstractController<T>, result: any) => Promise<T>;
+  create?: <T>(this: IAbstractController<T>, result: any) => Promise<T>;
+  update?: <T>(this: IAbstractController<T>, result: any) => Promise<T>;
+  delete?: <T>(this: IAbstractController<T>, result: any) => Promise<T>;
 }
 function identity<T>(arg: T): T {
   return arg;
@@ -60,12 +61,22 @@ export function WrapDecorators(decorators: IDecorators) {
 export type ClassType<T> = {
   new (...args: any[]): T;
 };
+export interface IAbstractController<T> {
+  _service: AbstractTypeOrmService<T>;
+  findAll: (
+    query: FindAllQuery,
+  ) => Promise<{ data: { list: T[] } | IpaginationResult<T> }>;
+  findOne: (id: number) => Promise<{ data: boolean | T }>;
+  create: (body: any) => Promise<{ data: T[] | InsertResult }>;
+  update: (id: number, body: any) => Promise<{ data: T }>;
+  delete: (id: number) => Promise<boolean>;
+}
 export function WrapController<T>(options: AbstractControllerOptions<T>): any {
   const model = options.model;
   class createDto extends model {}
   class updateDto extends PartialType(createDto) {}
-  abstract class AbstractController {
-    protected readonly _service: AbstractTypeOrmService<T>;
+  abstract class AbstractController implements IAbstractController<T> {
+    readonly _service: AbstractTypeOrmService<T>;
     constructor(service: any) {
       this._service = service;
     }
@@ -76,7 +87,7 @@ export function WrapController<T>(options: AbstractControllerOptions<T>): any {
     ): Promise<{ data: { list: T[] } | IpaginationResult<T> }> {
       let result = await this._service.find(query);
       if (options?.afterFunctions?.findAll) {
-        result = await options?.afterFunctions?.findAll(result);
+        result = await options?.afterFunctions?.findAll.apply(this, [result]);
       }
       // 判断是否有page
       return {
@@ -88,7 +99,7 @@ export function WrapController<T>(options: AbstractControllerOptions<T>): any {
     public async findOne(@Param('id') id: number) {
       let result = await this._service.findOne(id);
       if (options?.afterFunctions?.findOne) {
-        result = await options?.afterFunctions?.findOne(result);
+        result = await options?.afterFunctions?.findOne.apply(this, [result]);
       }
       return {
         data: result,
@@ -99,7 +110,7 @@ export function WrapController<T>(options: AbstractControllerOptions<T>): any {
     public async create(@Body() body: createDto) {
       let result = await this._service.create(body);
       if (options?.afterFunctions?.create) {
-        result = await options?.afterFunctions?.create(result);
+        result = await options?.afterFunctions?.create.apply(this, [result]);
       }
       return {
         data: result,
@@ -110,8 +121,6 @@ export function WrapController<T>(options: AbstractControllerOptions<T>): any {
     public async update(@Param() id: number, @Body() body: updateDto) {
       let result = await this._service.update(id, body);
       if (options?.afterFunctions?.update) {
-        console.log('111111');
-
         result = await options?.afterFunctions?.update.apply(this, [result]);
       }
       return {
@@ -121,9 +130,9 @@ export function WrapController<T>(options: AbstractControllerOptions<T>): any {
     @WrapDecorators(options.decorators)
     @Delete(':id')
     public async delete(@Param('id') id: number): Promise<boolean> | never {
-      let result = await this._service.delete(id);
+      const result = await this._service.delete(id);
       if (options?.afterFunctions?.delete) {
-        return options?.afterFunctions?.delete(result);
+        return options?.afterFunctions?.delete.apply(this, [result]);
       } else {
         return result;
       }
