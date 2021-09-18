@@ -7,6 +7,7 @@ import { getAddProviders, AdminModule } from './modules';
 import { HttpModule } from '@nestjs/axios';
 const { Controllers, Services, Entities } = getAddProviders();
 console.log(Controllers, Services, Entities);
+
 @Module({
   imports: [
     // TypeOrmModule.forRoot({

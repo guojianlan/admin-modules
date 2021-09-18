@@ -55,6 +55,7 @@ export interface FindAllQuery {
 }
 export interface extentEntityTarget {
   __delete_table__?: string;
+  __table_name__?: string;
 }
 export interface IpaginationResult<T> {
   list?: T[];
@@ -74,9 +75,9 @@ const defaultOptions: AbstractServiceExtraOptions = {
   },
 };
 export abstract class AbstractTypeOrmService<T> {
-  protected _model: Repository<T>;
-  protected _entity: EntityTarget<T> & extentEntityTarget;
-  protected options: AbstractServiceExtraOptions;
+  public _model: Repository<T>;
+  public _entity: EntityTarget<T> & extentEntityTarget;
+  public options: AbstractServiceExtraOptions;
   constructor(
     model: Repository<T>,
     _entity: EntityTarget<T> & extentEntityTarget,
@@ -95,6 +96,7 @@ export abstract class AbstractTypeOrmService<T> {
     builder: SelectQueryBuilder<T>,
     query?: FindAllQuery,
   ) {
+    // eslint-disable-next-line prefer-const
     let { page = 1, pageSize = this.options.page_size, needPage } = query;
     if (needPage || (query.page && query.pageSize)) {
       if (page < 1) {
@@ -177,9 +179,13 @@ export abstract class AbstractTypeOrmService<T> {
       builder.addOrderBy('id', 'DESC');
     }
   }
-  public queryBuilder(query?: FindAllQuery) {
-    const builder = this._model.createQueryBuilder('model');
-    console.log(query);
+  public queryBuilder(query?: FindAllQuery, table_alias?: string) {
+    console.log(this._model.metadata.tableName);
+    const builder = this._model.createQueryBuilder(
+      table_alias ||
+        this._model.metadata.tableName ||
+        this._entity.__table_name__,
+    );
     if (query) {
       this.generateFilterBuilder(builder, query);
       this.generateOrderBuilder(builder, query);
@@ -201,7 +207,7 @@ export abstract class AbstractTypeOrmService<T> {
         this.options.findInjectDeleteWhere &&
         this.options.deleteAfterAction === 'log_time'
       ) {
-        this.addDeleteCondition(builder);
+        await this.addDeleteCondition(builder);
       }
       if (query.needPage || (query.page && query.pageSize)) {
         this.generatePaginationBuilder(builder, query);
@@ -254,7 +260,7 @@ export abstract class AbstractTypeOrmService<T> {
         this.options.findInjectDeleteWhere &&
         this.options.deleteAfterAction === 'log_time'
       ) {
-        this.addDeleteCondition(builder);
+        await this.addDeleteCondition(builder);
       }
       const result = await builder.getOneOrFail();
       return result;
@@ -284,10 +290,8 @@ export abstract class AbstractTypeOrmService<T> {
       if (this.options.deleteAfterAction == 'normal') {
         const result = await this.findOne(id);
         if (result) {
-          console.log('aaaa');
           await this._model.delete(id);
           this.createColumnByDelete(result);
-
           return true;
         }
       }

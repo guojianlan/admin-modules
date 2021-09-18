@@ -13,3 +13,16 @@ export const HocClass = <T extends Constructor, Y extends Constructor>(
   }
   return BaseClass as unknown as typeof Base;
 };
+
+export function applyMixins(derivedCtor: any, constructors: any[]) {
+  constructors.forEach((baseCtor) => {
+    Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
+      Object.defineProperty(
+        derivedCtor.prototype,
+        name,
+        Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
+          Object.create(null),
+      );
+    });
+  });
+}
