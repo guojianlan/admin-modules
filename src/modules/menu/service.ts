@@ -16,4 +16,7 @@ export class AdminMenuService extends AbstractTypeOrmService<AdminMenuEntity> {
       deleteAfterAction: 'normal',
     });
   }
+  gg(){
+    console.log(123);
+  }
 }

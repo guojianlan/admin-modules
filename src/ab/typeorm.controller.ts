@@ -16,6 +16,16 @@ export interface IDecorators {
   update?: Array<MethodDecorator | PropertyDecorator>;
   delete?: Array<MethodDecorator | PropertyDecorator>;
 }
+export interface IAbstractController<T> {
+  _service: AbstractTypeOrmService<T>;
+  findAll: (
+    query: FindAllQuery,
+  ) => Promise<{ data: { list: T[] } | IpaginationResult<T> }>;
+  findOne: (id: number) => Promise<{ data: boolean | T }>;
+  create: (body: any) => Promise<{ data: T[] | InsertResult }>;
+  update: (id: number, body: any) => Promise<{ data: T }>;
+  delete: (id: number) => Promise<boolean>;
+}
 export interface IAfterFn {
   findAll?: <T>(this: IAbstractController<T>, result: any) => Promise<T>;
   findOne?: <T>(this: IAbstractController<T>, result: any) => Promise<T>;
@@ -23,10 +33,6 @@ export interface IAfterFn {
   update?: <T>(this: IAbstractController<T>, result: any) => Promise<T>;
   delete?: <T>(this: IAbstractController<T>, result: any) => Promise<T>;
 }
-function identity<T>(arg: T): T {
-  return arg;
-}
-identity<string>('');
 export type AbstractControllerOptions<T> = {
   model: any;
   decorators?: IDecorators;
