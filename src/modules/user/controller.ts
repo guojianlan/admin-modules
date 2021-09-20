@@ -46,6 +46,23 @@ export class AdminUserController
     const token = await this.service.generateJWT(user);
     return token;
   }
+  @Post('registerAdminUser')
+  @PublicDecorator()
+  async registerAdminUser(
+    @Body() body: RegisterByUserNameDto,
+    @Req() req: Request,
+  ) {
+    //创建管理员
+
+    const user = await this.service.find();
+    if (!user) {
+      await this.service.checkCode(body.code, req);
+      return this.service.registerByUserName({
+        ...body,
+      });
+    }
+    return '超级管理员已存在';
+  }
   @Post('registerByUserName')
   async registerByUserName(
     @Body() body: RegisterByUserNameDto,
