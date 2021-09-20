@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AbstractServiceExtraOptions, AbstractTypeOrmService } from '../../ab';
+import {  AbstractTypeOrmService } from 'nestjs-abstract-module';
 import { Repository } from 'typeorm';
 import { AdminMenuEntity } from './entity';
 @Injectable()

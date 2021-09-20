@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { WrapController } from '../../ab';
+import { WrapController } from 'nestjs-abstract-module';
 import { AdminPermissionEntity } from './entity';
 import { AdminPermissionService } from './service';
 import { AuthPermissionGuard } from '../decorators';
