@@ -13,7 +13,7 @@ import { isEmail } from 'class-validator';
 import * as svgCaptcha from 'svg-captcha';
 import * as bcrypt from 'bcrypt';
 import { parse } from 'querystring';
-import { captchaList, JwtOptions } from '../global.var';
+import { captchaList, JwtOptions, Store } from '../global.var';
 import { Request } from 'express';
 import { AdminUserRoleEntity } from '../user_role';
 import { AdminPermissionEntity } from '../permission';

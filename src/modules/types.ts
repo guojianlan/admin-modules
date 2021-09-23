@@ -10,6 +10,7 @@ export interface Param {
   providers: any[];
   imports: any[];
   jwtOptions?: IJwtOptions;
+  UserStore?: any;
 }
 
 export enum RequestMethods {
@@ -21,5 +22,5 @@ export enum RequestMethods {
 
 export interface ICustomReq {
   user: AdminUserEntity;
-  public:boolean
+  public: boolean;
 }

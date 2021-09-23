@@ -1,5 +1,6 @@
 import { IJwtOptions } from './types';
 import * as EventEmitter from 'events';
+import { UserAuthCache } from './helper';
 export const captchaList = {};
 
 export class AdminStore {
@@ -27,6 +28,9 @@ export class JwtOptions {
     }
   }
 }
+export const Store: { userStore: UserAuthCache } = {
+  userStore: undefined,
+};
 
 class MyEmitter extends EventEmitter {}
 

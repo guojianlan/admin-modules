@@ -19,7 +19,7 @@ import {
   SetUserRoleDto,
 } from './dto';
 import { Request, Response } from 'express';
-import { captchaList } from '../global.var';
+import { captchaList, Store } from '../global.var';
 import { AuthGuard, AuthPermissionGuard, PublicDecorator } from '../decorators';
 const CrudController = WrapController({
   model: AdminUserEntity,
@@ -49,8 +49,10 @@ export class AdminUserController
   @Post('loginByUserName')
   @PublicDecorator()
   async loginByUsername(@Body() body: LoginByUserNameDto, @Req() req: Request) {
-    await this.service.checkCode(body.code, req);
+    // await this.service.checkCode(body.code, req);
     const user = await this.service.loginByUsername(body);
+    console.log(user);
+    await Store.userStore.set('123213', JSON.stringify(user));
     const token = await this.service.generateJWT(user);
     return token;
   }
@@ -69,7 +71,6 @@ export class AdminUserController
     @Req() req: Request,
   ) {
     //创建管理员
-
     const user = await this.service.find();
     if (user == undefined || user.list.length == 0) {
       await this.service.checkCode(body.code, req);
@@ -93,6 +94,7 @@ export class AdminUserController
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
+    console.log(await Store.userStore.get('123213'));
     const captcha = await this.service.getCaptcha();
     captchaList[captcha.text] = true;
     res.cookie('captcha', captcha.text);
