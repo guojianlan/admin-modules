@@ -144,7 +144,6 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
       height: 40,
     });
     captcha.text = bcrypt.hashSync(captcha.text.toLocaleLowerCase(), 8);
-    console.log(JwtOptions.getOptions().secret);
     // console.log(
     //   jwt.verify(
     //     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NywiY3RpbWUiOjE2MzEyOTEwMzcsIm10aW1lIjoxNjMxMjkxMDM3LCJkdGltZSI6MCwibW9iaWxlIjoiMTU5MjAxMTI4NjEiLCJlbWFpbCI6IjQyNDEyMjIzOTc3MjI3QHFxLmNvbSIsImlhdCI6MTYzMTc1MjQzNX0.jnKy6qyahqYivWYcIlkbd05xzm_jCeIUFOWoSLdw9kc',
@@ -264,9 +263,26 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
     }
     return [];
   }
+  public async expireJWT() {
+    const payload = Object.assign({
+      id: '7',
+    });
+    const token = jwt.sign(
+      {
+        id: payload.id,
+      },
+      JwtOptions.getOptions().secret,
+    );
+    return token;
+  }
   public async generateJWT(data: any) {
     const payload = Object.assign({}, data);
-    const token = jwt.sign(payload, JwtOptions.getOptions().secret);
+    const token = jwt.sign(
+      {
+        id: payload.id,
+      },
+      JwtOptions.getOptions().secret,
+    );
     return token;
   }
   public async verifyJWT(token) {

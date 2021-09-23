@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  Get,
+  Param,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { WrapController } from 'nestjs-abstract-module';
 import { AdminUserEntity } from './entity';
 import { AdminUserService } from './service';
@@ -11,7 +20,7 @@ import {
 } from './dto';
 import { Request, Response } from 'express';
 import { captchaList } from '../global.var';
-import { AuthPermissionGuard, PublicDecorator } from '../decorators';
+import { AuthGuard, AuthPermissionGuard, PublicDecorator } from '../decorators';
 const CrudController = WrapController({
   model: AdminUserEntity,
 });
@@ -19,7 +28,6 @@ export interface AdminUserControllerImplements {
   loginByUsername: (body: any, ...args: any[]) => any;
   registerByUserName: (body: any, ...args: any[]) => any;
 }
-@AuthPermissionGuard()
 @Controller('admin/user')
 export class AdminUserController
   extends CrudController
@@ -45,6 +53,14 @@ export class AdminUserController
     const user = await this.service.loginByUsername(body);
     const token = await this.service.generateJWT(user);
     return token;
+  }
+  @AuthGuard()
+  @Post('logout')
+  async logout(@Req() req: any) {
+    if (req.user == undefined) {
+      throw new ForbiddenException();
+    }
+    return this.service.expireJWT();
   }
   @Post('registerAdminUser')
   @PublicDecorator()
