@@ -1,41 +1,35 @@
+import * as crypto from 'crypto';
 export class UserAuthCache {
   public cacheList: Record<string, unknown>;
-  static getInstall: UserAuthCache | null;
-  static options: any;
+  public options: any;
   constructor(options?: any) {
     this.cacheList = {};
-    UserAuthCache.options = options;
   }
   async init(options?: any) {
-    console.log('init', 11111);
-    if (!UserAuthCache.getInstall) {
-      UserAuthCache.getInstall = new UserAuthCache(options);
-    }
-    return UserAuthCache.getInstall;
+    // if (!UserAuthCache.getInstall) {
+    //   UserAuthCache.getInstall = new UserAuthCache(options);
+    // }
+    // return UserAuthCache.getInstall;
+    this.options = options;
   }
-  async changeOptions(options?: any) {
-    if (!UserAuthCache.getInstall) {
-      UserAuthCache.getInstall = await this.init();
-    }
-    UserAuthCache.options = options;
-  }
+
   async get(key: string) {
     try {
-      if (!UserAuthCache.getInstall) {
-        UserAuthCache.getInstall = await this.init();
-      }
-      console.log(UserAuthCache.options);
-      return UserAuthCache.getInstall.cacheList[key];
+      return this.cacheList[key];
+    } catch (e) {
+      throw e;
+    }
+  }
+  async getAll() {
+    try {
+      return this.cacheList;
     } catch (e) {
       throw e;
     }
   }
   async set(key: string, value: string) {
     try {
-      if (!UserAuthCache.getInstall) {
-        UserAuthCache.getInstall = await this.init();
-      }
-      UserAuthCache.getInstall.cacheList[key] = value;
+      this.cacheList[key] = value;
       return key;
     } catch (e) {
       throw e;
@@ -43,10 +37,33 @@ export class UserAuthCache {
   }
   async remote(key) {
     try {
-      delete UserAuthCache.getInstall.cacheList[key];
+      delete this.cacheList[key];
+      return true;
     } catch (e) {
-      UserAuthCache.getInstall.cacheList[key] = null;
+      this.cacheList[key] = null;
       throw e;
     }
   }
 }
+
+export const generateHash = () => {
+  return generateSha1(randomString());
+};
+export const randomString = (len = 10) => {
+  return Math.random().toString(32).substr(2, len) + randomString2();
+};
+
+export const randomString2 = (len = 6, charSet?: string) => {
+  const chars =
+    charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let randomStr = '';
+  for (let i = 0; i < len; i++) {
+    randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return randomStr;
+};
+export const generateSha1 = (str: string) => {
+  const sha1 = crypto.createHash('sha1');
+  sha1.update(str);
+  return sha1.digest('hex');
+};

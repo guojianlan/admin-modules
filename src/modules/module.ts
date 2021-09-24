@@ -1,6 +1,6 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import { Param } from './types';
-import { JwtOptions, Store } from './global.var';
+import { Store } from './global.var';
 import { UserAuthCache } from './helper';
 import { AdminUserController, AdminUserService, AdminUserEntity } from './user';
 import { AdminRoleController, AdminRoleService, AdminRoleEntity } from './role';
@@ -62,23 +62,38 @@ export const getAddProviders = () => {
 @Module({})
 export class AdminModule {
   static async forRootAsync(param: Param): Promise<DynamicModule> {
-    JwtOptions.setOptions(param.jwtOptions);
-    if (param.UserStore?.classObject) {
-      Store.userStore = new param.UserStore.classObject(
-        param.UserStore?.options,
-      );
-    } else {
-      console.log(param.UserStore?.options);
-      Store.userStore = new UserAuthCache(param.UserStore?.options);
-    }
-    await Store.userStore.init(param.UserStore?.options);
-
+    console.log(param);
     return {
       module: AdminModule,
       imports: [...param.imports],
       controllers: [...(param && param.controllers)],
-      providers: [...(param && param.providers)],
+      providers: [
+        ...(param && param.providers),
+        {
+          provide: 'PARAM_ASYNC_ADMIN_PARAM',
+          useValue: param,
+        },
+        {
+          provide: 'PARAM_ASYNC_ADMIN_INIT',
+          useFactory: async (...args) => {
+            console.log(args);
+            await param.useFactory();
+            // if (param.UserStore?.classObject) {
+            //   Store.userStore = new param.UserStore.classObject(
+            //     param.UserStore?.options,
+            //   );
+            // } else {
+            //   Store.userStore = new UserAuthCache(param.UserStore?.options);
+            // }
+            // await Store.userStore.init(param.UserStore?.options);
+          },
+          inject: [...param.inject],
+        },
+      ],
       exports: [...param?.providers, ...param?.imports],
     };
+  }
+  constructor() {
+    console.log(123123);
   }
 }

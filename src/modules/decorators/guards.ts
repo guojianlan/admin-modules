@@ -21,16 +21,20 @@ export class AdminAuthGuard implements CanActivate, OnModuleInit {
     if (isPublic) {
       return true;
     }
-    const authorization = req.headers.authorization;
-    if (authorization == undefined) {
+
+    const auth_token = req.headers['auth-token'];
+    if (auth_token == undefined) {
       return false;
     }
-    const [key, jwtToken] = authorization.split(' ');
     try {
-      const jwt_data = await this.adminUserService.verifyJWT(jwtToken);
+      const auth_data = await this.adminUserService.verifyAuthToken(auth_token);
+      if (auth_data == undefined || !auth_data) {
+        return false;
+      }
       const user = (await this.adminUserService.isExistUser(
-        jwt_data.id,
+        auth_data.id,
       )) as AdminUserEntity;
+      console.log(user);
       req.user = user;
     } catch (err) {
       return false;

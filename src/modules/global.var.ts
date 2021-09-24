@@ -1,4 +1,3 @@
-import { IJwtOptions } from './types';
 import * as EventEmitter from 'events';
 import { UserAuthCache } from './helper';
 export const captchaList = {};
@@ -13,19 +12,6 @@ export class AdminStore {
   }
   static getAllCaches() {
     return AdminStore.caches;
-  }
-}
-export class JwtOptions {
-  static options: IJwtOptions = {
-    secret: 'asdhij',
-  };
-  static getOptions() {
-    return JwtOptions.options;
-  }
-  static setOptions(data: IJwtOptions) {
-    if (data) {
-      JwtOptions.options = data;
-    }
   }
 }
 export const Store: { userStore: UserAuthCache } = {

@@ -4,9 +4,10 @@ import { AppService } from './app.service';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getAddProviders, AdminModule } from './modules';
-import { HttpModule } from '@nestjs/axios';
+import { HttpModule, HttpService } from '@nestjs/axios';
 const { Controllers, Services, Entities } = getAddProviders();
 import * as Redis from 'ioredis';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 console.log(Controllers, Services, Entities);
 export class RedisUserAuthCache {
   public clientRedis: Redis.Redis;
@@ -14,7 +15,7 @@ export class RedisUserAuthCache {
   constructor() {
     this.clientRedis = new Redis({
       host: '127.0.0.1',
-      port: 6379,
+      port: 6378,
       password: '5201314qv',
       db: 3,
     });
@@ -27,7 +28,6 @@ export class RedisUserAuthCache {
     return await this.clientRedis.get(key);
   }
   async set(key: string, value: string) {
-    console.log('set', 'RedisUserAuthCache');
     try {
       await this.clientRedis.set(key, value, 'ex', 3000);
       return key;
@@ -35,8 +35,13 @@ export class RedisUserAuthCache {
       throw e;
     }
   }
-  async remote() {
-    console.log('remove');
+  async remote(key: string) {
+    try {
+      await this.clientRedis.del(key);
+      return key;
+    } catch (e) {
+      throw e;
+    }
   }
 }
 @Module({
@@ -48,27 +53,36 @@ export class RedisUserAuthCache {
     //   synchronize: true,
     //   logging: true,
     // }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      username: 'root',
-      host: '127.0.0.1',
-      port: 3316,
-      password: 'example',
-      database: 'test1',
-      entities: [...Object.values(Entities)],
-      synchronize: true,
-      logging: true,
+    ConfigModule.forRoot(),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        return {
+          type: 'mysql',
+          username: 'root',
+          host: '127.0.0.1',
+          port: 3316,
+          password: 'example',
+          database: 'test1',
+          entities: [...Object.values(Entities)],
+          synchronize: true,
+          logging: true,
+        };
+      },
     }),
     AdminModule.forRootAsync({
-      UserStore: {
-        // classObject: RedisUserAuthCache,
-        options: {
-          ttl: 3000,
-        },
+      useFactory: async (config: ConfigService, ...args) => {
+        console.log(config, '333333');
       },
-      imports: [TypeOrmModule.forFeature(Object.values(Entities))],
+      imports: [
+        HttpModule,
+        TypeOrmModule.forFeature(Object.values(Entities)),
+        ConfigModule,
+      ],
       controllers: [...Object.values(Controllers)],
       providers: [...Object.values(Services)],
+      inject: [ConfigService, HttpService],
     }),
     HttpModule,
   ],

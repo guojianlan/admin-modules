@@ -21,6 +21,7 @@ import {
 import { Request, Response } from 'express';
 import { captchaList, Store } from '../global.var';
 import { AuthGuard, AuthPermissionGuard, PublicDecorator } from '../decorators';
+import { generateHash } from '../helper';
 const CrudController = WrapController({
   model: AdminUserEntity,
 });
@@ -51,9 +52,7 @@ export class AdminUserController
   async loginByUsername(@Body() body: LoginByUserNameDto, @Req() req: Request) {
     // await this.service.checkCode(body.code, req);
     const user = await this.service.loginByUsername(body);
-    console.log(user);
-    await Store.userStore.set('123213', JSON.stringify(user));
-    const token = await this.service.generateJWT(user);
+    const token = await this.service.generateAuthToken(user);
     return token;
   }
   @AuthGuard()
@@ -62,7 +61,7 @@ export class AdminUserController
     if (req.user == undefined) {
       throw new ForbiddenException();
     }
-    return this.service.expireJWT();
+    return this.service.logout(req);
   }
   @Post('registerAdminUser')
   @PublicDecorator()
@@ -94,7 +93,6 @@ export class AdminUserController
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    console.log(await Store.userStore.get('123213'));
     const captcha = await this.service.getCaptcha();
     captchaList[captcha.text] = true;
     res.cookie('captcha', captcha.text);

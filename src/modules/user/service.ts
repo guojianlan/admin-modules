@@ -13,12 +13,11 @@ import { isEmail } from 'class-validator';
 import * as svgCaptcha from 'svg-captcha';
 import * as bcrypt from 'bcrypt';
 import { parse } from 'querystring';
-import { captchaList, JwtOptions, Store } from '../global.var';
+import { captchaList, Store } from '../global.var';
 import { Request } from 'express';
 import { AdminUserRoleEntity } from '../user_role';
 import { AdminPermissionEntity } from '../permission';
-import * as jwt from 'jsonwebtoken';
-import { plainToClass } from 'class-transformer';
+import { generateHash } from '../helper';
 @Injectable()
 export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
   // entity: UserEntity;
@@ -101,7 +100,6 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
     }
     delete user.password;
     return user;
-    return body;
   }
   public async registerByUserName(body: RegisterByUserNameDto) {
     return this.__registerByUserName(body);
@@ -263,32 +261,32 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
     }
     return [];
   }
-  public async expireJWT() {
-    const payload = Object.assign({
-      id: '7',
-    });
-    const token = jwt.sign(
-      {
-        id: payload.id,
-      },
-      JwtOptions.getOptions().secret,
-    );
-    return token;
+  public async logout(req: Request) {
+    const auth_token = req.headers['auth-token'];
+    if (auth_token) {
+      if (await Store.userStore.remote(auth_token)) {
+        return true;
+      }
+    } else {
+      return false;
+    }
   }
-  public async generateJWT(data: any) {
+  public async generateAuthToken(data: any) {
     const payload = Object.assign({}, data);
-    const token = jwt.sign(
-      {
+    const token = await Store.userStore.set(
+      generateHash(),
+      JSON.stringify({
         id: payload.id,
-      },
-      JwtOptions.getOptions().secret,
+      }),
     );
     return token;
   }
-  public async verifyJWT(token) {
-    return jwt.verify(
-      token,
-      JwtOptions.getOptions().secret,
-    ) as unknown as AdminUserEntity;
+  public async verifyAuthToken(token) {
+    try {
+      const value = (await Store.userStore.get(token)) as string;
+      return JSON.parse(value);
+    } catch (e) {
+      throw e;
+    }
   }
 }

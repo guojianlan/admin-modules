@@ -9,11 +9,8 @@ export interface Param {
   controllers: any[];
   providers: any[];
   imports: any[];
-  jwtOptions?: IJwtOptions;
-  UserStore: {
-    classObject?: any;
-    options: any;
-  };
+  inject: any[];
+  useFactory: (...args: any[]) => void;
 }
 
 export enum RequestMethods {
