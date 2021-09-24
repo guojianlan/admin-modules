@@ -14,7 +14,7 @@ export class RedisUserAuthCache {
   constructor() {
     this.clientRedis = new Redis({
       host: '127.0.0.1',
-      port: 6378,
+      port: 6379,
       password: '5201314qv',
       db: 3,
     });
@@ -60,7 +60,12 @@ export class RedisUserAuthCache {
       logging: true,
     }),
     AdminModule.forRootAsync({
-      UserStore: RedisUserAuthCache,
+      UserStore: {
+        // classObject: RedisUserAuthCache,
+        options: {
+          ttl: 3000,
+        },
+      },
       imports: [TypeOrmModule.forFeature(Object.values(Entities))],
       controllers: [...Object.values(Controllers)],
       providers: [...Object.values(Services)],

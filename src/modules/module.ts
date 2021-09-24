@@ -63,12 +63,16 @@ export const getAddProviders = () => {
 export class AdminModule {
   static async forRootAsync(param: Param): Promise<DynamicModule> {
     JwtOptions.setOptions(param.jwtOptions);
-    if (param.UserStore) {
-      Store.userStore = new param.UserStore();
+    if (param.UserStore?.classObject) {
+      Store.userStore = new param.UserStore.classObject(
+        param.UserStore?.options,
+      );
     } else {
-      Store.userStore = new UserAuthCache();
+      console.log(param.UserStore?.options);
+      Store.userStore = new UserAuthCache(param.UserStore?.options);
     }
-    await Store.userStore.init();
+    await Store.userStore.init(param.UserStore?.options);
+
     return {
       module: AdminModule,
       imports: [...param.imports],

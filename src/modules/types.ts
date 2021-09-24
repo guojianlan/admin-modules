@@ -10,7 +10,10 @@ export interface Param {
   providers: any[];
   imports: any[];
   jwtOptions?: IJwtOptions;
-  UserStore?: any;
+  UserStore: {
+    classObject?: any;
+    options: any;
+  };
 }
 
 export enum RequestMethods {
