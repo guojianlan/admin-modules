@@ -264,7 +264,7 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
   public async logout(req: Request) {
     const auth_token = req.headers['auth-token'];
     if (auth_token) {
-      if (await Store.userStore.remote(auth_token)) {
+      if (await Store.userStore.remove(auth_token)) {
         return true;
       }
     } else {

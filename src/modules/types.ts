@@ -12,6 +12,11 @@ export interface Param {
   inject: any[];
   useFactory: (...args: any[]) => void;
 }
+export interface IUserStore {
+  get: (key: string) => Promise<any>;
+  set: (key: string, value: string) => Promise<string>;
+  remove: (key: string | string[]) => Promise<boolean>;
+}
 
 export enum RequestMethods {
   GET = 'get',

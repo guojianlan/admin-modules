@@ -1,30 +1,26 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { getAddProviders, AdminModule } from './modules';
+import { getAddProviders, AdminModule, Store,UserAuthCache } from './modules';
 import { HttpModule, HttpService } from '@nestjs/axios';
 const { Controllers, Services, Entities } = getAddProviders();
 import * as Redis from 'ioredis';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-console.log(Controllers, Services, Entities);
 export class RedisUserAuthCache {
   public clientRedis: Redis.Redis;
   public options: any;
-  constructor() {
+  constructor(options?: any) {
     this.clientRedis = new Redis({
       host: '127.0.0.1',
-      port: 6378,
+      port: 6379,
       password: '5201314qv',
       db: 3,
     });
-  }
-  async init(options: any) {
     this.options = options;
+    console.log(this.options);
   }
   async get(key: string) {
-    console.log('get', 'RedisUserAuthCache');
     return await this.clientRedis.get(key);
   }
   async set(key: string, value: string) {
@@ -35,10 +31,17 @@ export class RedisUserAuthCache {
       throw e;
     }
   }
-  async remote(key: string) {
+  async getAll() {
+    try {
+      console.log('getAll');
+    } catch (e) {
+      throw e;
+    }
+  }
+  async remove(key: string) {
     try {
       await this.clientRedis.del(key);
-      return key;
+      return true;
     } catch (e) {
       throw e;
     }
@@ -72,8 +75,10 @@ export class RedisUserAuthCache {
       },
     }),
     AdminModule.forRootAsync({
-      useFactory: async (config: ConfigService, ...args) => {
-        console.log(config, '333333');
+      useFactory: async (config: ConfigService, http: HttpService) => {
+
+        Store.userStore = new RedisUserAuthCache(12);
+
       },
       imports: [
         HttpModule,

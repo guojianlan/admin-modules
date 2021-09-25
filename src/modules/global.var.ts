@@ -1,5 +1,6 @@
 import * as EventEmitter from 'events';
 import { UserAuthCache } from './helper';
+import { IUserStore } from './types';
 export const captchaList = {};
 
 export class AdminStore {
@@ -14,10 +15,13 @@ export class AdminStore {
     return AdminStore.caches;
   }
 }
-export const Store: { userStore: UserAuthCache } = {
+export const Store: { userStore: IUserStore } = {
   userStore: undefined,
 };
 
 class MyEmitter extends EventEmitter {}
 
 export const myEmitterInstalled = new MyEmitter();
+
+export const ADMIN_PARAM_TOKEN = '__ADMIN_PARAM_TOKEN__';
+export const ADMIN_PARAM_INIT_TOKEN = '__ADMIN_PARAM_INIT_TOKEN__';

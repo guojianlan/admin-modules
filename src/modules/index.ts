@@ -6,3 +6,4 @@ export * from './role_permission';
 export * from './role_menu';
 export * from './global.var';
 export * from './types';
+export * from './helper';

@@ -4,15 +4,8 @@ export class UserAuthCache {
   public options: any;
   constructor(options?: any) {
     this.cacheList = {};
-  }
-  async init(options?: any) {
-    // if (!UserAuthCache.getInstall) {
-    //   UserAuthCache.getInstall = new UserAuthCache(options);
-    // }
-    // return UserAuthCache.getInstall;
     this.options = options;
   }
-
   async get(key: string) {
     try {
       return this.cacheList[key];
@@ -35,7 +28,7 @@ export class UserAuthCache {
       throw e;
     }
   }
-  async remote(key) {
+  async remove(key) {
     try {
       delete this.cacheList[key];
       return true;
