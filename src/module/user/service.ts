@@ -14,7 +14,7 @@ import * as svgCaptcha from 'svg-captcha';
 import * as bcrypt from 'bcrypt';
 import { parse } from 'querystring';
 import { captchaList, Store } from '../global.var';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { AdminUserRoleEntity } from '../user_role';
 import { AdminPermissionEntity } from '../permission';
 import { generateHash } from '../helper';
@@ -160,13 +160,16 @@ export class AdminUserService extends AbstractTypeOrmService<AdminUserEntity> {
     if (captcha == undefined) {
       throw new BadRequestException('请获取验证码');
     }
-    if (!captchaList[captcha as string]) {
-      throw new BadRequestException('验证码不存在');
-    }
+    // if (!captchaList[captcha as string]) {
+    //   throw new BadRequestException('验证码不存在');
+    // }
     if (!(await this.validateCaptcha(code, captcha as string))) {
       throw new BadRequestException('验证码错误');
     }
-    delete captchaList[captcha as string];
+    // delete captchaList[captcha as string];
+  }
+  public async deleteCaptcha(res: Response) {
+    res.cookie('captcha', '', { maxAge: 0 });
   }
   public async isExistUser(id) {
     return await this.findOne(id);

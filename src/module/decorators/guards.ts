@@ -8,6 +8,7 @@ import { Request } from 'express';
 import { AdminUserService, AdminUserEntity } from '../user';
 import { ModuleRef, Reflector } from '@nestjs/core';
 import { ICustomReq } from '../types';
+import {ADMIN_GLOBAL} from '../global.var'
 @Injectable()
 export class AdminAuthGuard implements CanActivate, OnModuleInit {
   private adminUserService: AdminUserService;
@@ -22,7 +23,7 @@ export class AdminAuthGuard implements CanActivate, OnModuleInit {
       return true;
     }
 
-    const auth_token = req.headers['auth-token'];
+    const auth_token = req.headers[ADMIN_GLOBAL.header_token || 'auth-token'];
     if (auth_token == undefined) {
       return false;
     }

@@ -1,6 +1,5 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import { Param } from './types';
-import { ADMIN_PARAM_INIT_TOKEN, ADMIN_PARAM_TOKEN } from './global.var';
 import { AdminUserController, AdminUserService, AdminUserEntity } from './user';
 import { AdminRoleController, AdminRoleService, AdminRoleEntity } from './role';
 import {
@@ -25,6 +24,7 @@ import {
   AdminRoleMenuEntity,
 } from './role_menu';
 import { AdminMenuController, AdminMenuService, AdminMenuEntity } from './menu';
+import {ADMIN_PARAM_INIT_TOKEN, ADMIN_PARAM_TOKEN} from "./global.var";
 export const getAddProviders = () => {
   return {
     Controllers: {
@@ -60,25 +60,22 @@ export const getAddProviders = () => {
 @Global()
 @Module({})
 export class AdminModule {
-  static async forRootAsync(param: Param): Promise<DynamicModule> {
+  static forRootAsync(param: Param): DynamicModule {
     return {
       module: AdminModule,
       imports: [...param.imports],
       controllers: [...(param && param.controllers)],
-      providers: [
-        ...(param && param.providers),
-        {
-          provide: ADMIN_PARAM_TOKEN,
-          useValue: param,
-        },
+      providers: [...(param && param.providers),{
+        provide: ADMIN_PARAM_TOKEN,
+        useValue: param,
+      },
         {
           provide: ADMIN_PARAM_INIT_TOKEN,
           useFactory: async (...args) => {
             await param.useFactory(...args);
           },
           inject: [...param.inject],
-        },
-      ],
+        },],
       exports: [...param?.providers, ...param?.imports],
     };
   }

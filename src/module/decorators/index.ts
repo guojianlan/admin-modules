@@ -16,5 +16,5 @@ export default {
   AdminAuthGuard,
   AdminPermissionGuard,
   PublicGuard,
-  AuthGuard,
+  AuthGuard
 };

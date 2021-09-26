@@ -1,4 +1,5 @@
 import { AdminUserEntity } from './user';
+import {ADMIN_GLOBAL} from "./global.var";
 
 export interface IJwtOptions {
   secret?: string;
@@ -28,4 +29,8 @@ export enum RequestMethods {
 export interface ICustomReq {
   user: AdminUserEntity;
   public: boolean;
+}
+
+export interface IAdminGlobal{
+  header_token:string
 }

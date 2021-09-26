@@ -1,8 +1,6 @@
+import {IAdminGlobal, IUserStore} from './types';
 import * as EventEmitter from 'events';
-import { UserAuthCache } from './helper';
-import { IUserStore } from './types';
 export const captchaList = {};
-
 export class AdminStore {
   static caches: { [key: string]: any } = {};
   static getCaches(key: string) {
@@ -18,10 +16,12 @@ export class AdminStore {
 export const Store: { userStore: IUserStore } = {
   userStore: undefined,
 };
-
 class MyEmitter extends EventEmitter {}
 
 export const myEmitterInstalled = new MyEmitter();
-
 export const ADMIN_PARAM_TOKEN = '__ADMIN_PARAM_TOKEN__';
 export const ADMIN_PARAM_INIT_TOKEN = '__ADMIN_PARAM_INIT_TOKEN__';
+
+export const ADMIN_GLOBAL:IAdminGlobal = {
+  header_token:undefined
+}

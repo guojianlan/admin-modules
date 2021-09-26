@@ -19,9 +19,7 @@ import {
   SetUserRoleDto,
 } from './dto';
 import { Request, Response } from 'express';
-import { captchaList, Store } from '../global.var';
 import { AuthGuard, AuthPermissionGuard, PublicDecorator } from '../decorators';
-import { generateHash } from '../helper';
 const CrudController = WrapController({
   model: AdminUserEntity,
 });
@@ -49,10 +47,18 @@ export class AdminUserController
   }
   @Post('loginByUserName')
   @PublicDecorator()
-  async loginByUsername(@Body() body: LoginByUserNameDto, @Req() req: Request) {
-    // await this.service.checkCode(body.code, req);
+  async loginByUsername(
+    @Body() body: LoginByUserNameDto,
+    @Req() req: Request,
+    @Res({
+      passthrough: true,
+    })
+      res: Response,
+  ) {
+    await this.service.checkCode(body.code, req);
     const user = await this.service.loginByUsername(body);
     const token = await this.service.generateAuthToken(user);
+    await this.service.deleteCaptcha(res);
     return token;
   }
   @AuthGuard()
@@ -68,11 +74,16 @@ export class AdminUserController
   async registerAdminUser(
     @Body() body: RegisterByUserNameDto,
     @Req() req: Request,
+    @Res({
+      passthrough: true,
+    })
+      res: Response,
   ) {
     //创建管理员
     const user = await this.service.find();
     if (user == undefined || user.list.length == 0) {
       await this.service.checkCode(body.code, req);
+      await this.service.deleteCaptcha(res);
       return this.service.registerByUserName({
         ...body,
       });
@@ -83,8 +94,13 @@ export class AdminUserController
   async registerByUserName(
     @Body() body: RegisterByUserNameDto,
     @Req() req: Request,
+    @Res({
+      passthrough: true,
+    })
+      res: Response,
   ) {
     await this.service.checkCode(body.code, req);
+    await this.service.deleteCaptcha(res);
     return this.service.registerByUserName(body);
   }
   @Get('getCaptcha')
@@ -94,9 +110,7 @@ export class AdminUserController
     @Res({ passthrough: true }) res: Response,
   ) {
     const captcha = await this.service.getCaptcha();
-    captchaList[captcha.text] = true;
     res.cookie('captcha', captcha.text);
-    console.log(captchaList);
     return captcha.data;
   }
   //设置用户角色

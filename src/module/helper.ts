@@ -39,8 +39,8 @@ export class UserAuthCache {
   }
 }
 
-export const generateHash = () => {
-  return generateSha1(randomString());
+export const generateHash = (len=10) => {
+  return generateSha1(randomString(len));
 };
 export const randomString = (len = 10) => {
   return Math.random().toString(32).substr(2, len) + randomString2();

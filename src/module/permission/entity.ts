@@ -3,8 +3,8 @@ import { AbstractTypeEntity } from 'nestjs-abstract-module';
 import { RequestMethods } from '../types';
 import { IsNotEmpty } from 'class-validator';
 
-@Entity('admin_permission', {
-  synchronize: false,
+@Entity('admin_permission',{
+  synchronize: false
 })
 export class AdminPermissionEntity extends AbstractTypeEntity {
   static __delete_table__ = 'del_admin_permission';
