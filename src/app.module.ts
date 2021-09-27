@@ -11,16 +11,11 @@ import {
   FileBaseModule,
   ImageController,
   ImageService,
+  FileFactor,
 } from './module/file_module';
 
 const { Controllers, Services, Entities } = getAddProviders();
 
-@Controller('images')
-class TextImage extends ImageController {
-  constructor(service: ImageService) {
-    super(service);
-  }
-}
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -37,7 +32,7 @@ class TextImage extends ImageController {
           database: 'test1',
           entities: [...Object.values(Entities), ...FileBaseModule.entities],
           synchronize: true,
-          logging: true,
+          logging: false,
         };
       },
     }),
@@ -45,23 +40,27 @@ class TextImage extends ImageController {
       useFactory: async (config: ConfigService, http: HttpService) => {
         Store.userStore = new RedisUserAuthCache({
           host: '127.0.0.1',
-          port: 6379,
+          port: 6378,
           password: '5201314qv',
         });
       },
       imports: [
-        HttpModule,
         TypeOrmModule.forFeature(Object.values(Entities)),
         ConfigModule,
       ],
       controllers: [...Object.values(Controllers)],
       providers: [...Object.values(Services)],
-      inject: [ConfigService, HttpService],
+      inject: [ConfigService],
     }),
     ImageModule.forRootAsync({
       imports: [TypeOrmModule.forFeature(FileBaseModule.entities)],
-      controllers: [TextImage],
+      controllers: [...FileBaseModule.controllers],
       providers: [...FileBaseModule.providers],
+      inject: [ConfigService],
+      destination: '/tmp/upload',
+      useFactory: async (configService: ConfigService) => {
+        return new FileFactor();
+      },
     }),
     HttpModule,
   ],

@@ -8,20 +8,17 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { AdminUserService, AdminUserEntity } from '../user';
-import { ModuleRef, Reflector } from '@nestjs/core';
+import { Reflector } from '@nestjs/core';
 import { ICustomReq } from '../types';
 import { ADMIN_GLOBAL } from '../global.var';
 @Injectable()
 export class AdminAuthGuard implements CanActivate {
-  // private adminUserService: AdminUserService;
   constructor(
     @Inject(forwardRef(() => AdminUserService))
     private adminUserService: AdminUserService,
     private reflector: Reflector,
   ) {}
-  // async onModuleInit() {
-  //   this.adminUserService = await this.moduleRef.get(AdminUserService);
-  // }
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<Request & ICustomReq>();
     const isPublic = this.reflector.get<any>('public', context.getHandler());

@@ -4,11 +4,10 @@ import {
   forwardRef,
   Inject,
   Injectable,
-  OnModuleInit,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { AdminUserEntity, AdminUserService } from '../user';
-import { ModuleRef, Reflector } from '@nestjs/core';
+import { AdminUserService } from '../user';
+import { Reflector } from '@nestjs/core';
 import { ICustomReq } from '../types';
 @Injectable()
 export class AdminPermissionGuard implements CanActivate {

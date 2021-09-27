@@ -1,22 +1,47 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import { ImageController, ImageEntity, ImageService } from './image';
 import { MulterModule } from '@nestjs/platform-express';
-import { memoryStorage } from 'multer';
-import { FileSaveFactor } from './global.var';
-@Global()
+import { memoryStorage, diskStorage } from 'multer';
+import {
+  CustomDiskStorage,
+  FILE_MODULE_INIT,
+  FILE_MODULE_PARAM,
+} from './global.var';
+import { Param } from './types';
+
 @Module({})
 export class ImageModule {
-  static async forRootAsync(param: any): Promise<DynamicModule> {
+  static async forRootAsync(param: Param): Promise<DynamicModule> {
     return {
       module: ImageModule,
       imports: [
         ...(param && (param.imports || [])),
-        MulterModule.register({
-          storage: memoryStorage(),
+        MulterModule.registerAsync({
+          useFactory: () => {
+            return {
+              storage: new CustomDiskStorage({
+                destination: param.destination || 'upload',
+              }),
+            };
+          },
         }),
       ],
       controllers: [...(param && (param.controllers || []))],
-      providers: [...(param && (param.providers || []))],
+      providers: [
+        {
+          provide: FILE_MODULE_PARAM,
+          useValue: param,
+        },
+        {
+          provide: FILE_MODULE_INIT,
+          useFactory: async (params) => {
+            console.log(params);
+            return await param.useFactory(params);
+          },
+          inject: [...(param && (param.inject || []))],
+        },
+        ...(param && (param.providers || [])),
+      ],
       exports: [
         ...(param && (param.providers || [])),
         ...(param && (param.imports || [])),
