@@ -1,5 +1,5 @@
 import * as Redis from 'ioredis';
-import { IUserStore } from './module';
+import { IUserStore } from './module/admin_module';
 export interface IRedisUserAuthCacheOptions {
   host: string;
   port: number;

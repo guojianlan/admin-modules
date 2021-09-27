@@ -1,27 +1,28 @@
-import { Get, Module } from '@nestjs/common';
+import { Controller, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import {
-  getAddProviders,
-  AdminModule,
-  Store,
-  AdminUserController,
-} from './module';
+import { getAddProviders, AdminModule, Store } from './module/admin_module';
 import { HttpModule, HttpService } from '@nestjs/axios';
-const { Controllers, Services, Entities } = getAddProviders();
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisUserAuthCache } from './userCacheRedis';
-import { applyMixins } from 'nestjs-abstract-module';
+import {
+  ImageModule,
+  FileBaseModule,
+  ImageController,
+  ImageService,
+} from './module/file_module';
+
+const { Controllers, Services, Entities } = getAddProviders();
+
+@Controller('images')
+class TextImage extends ImageController {
+  constructor(service: ImageService) {
+    super(service);
+  }
+}
 @Module({
   imports: [
-    // TypeOrmModule.forRoot({
-    //   type: 'sqlite',
-    //   database: 'data/test.db',
-    //   entities: [...Object.values(Entities)],
-    //   synchronize: true,
-    //   logging: true,
-    // }),
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -34,7 +35,7 @@ import { applyMixins } from 'nestjs-abstract-module';
           port: 3316,
           password: 'example',
           database: 'test1',
-          entities: [...Object.values(Entities)],
+          entities: [...Object.values(Entities), ...FileBaseModule.entities],
           synchronize: true,
           logging: true,
         };
@@ -56,6 +57,11 @@ import { applyMixins } from 'nestjs-abstract-module';
       controllers: [...Object.values(Controllers)],
       providers: [...Object.values(Services)],
       inject: [ConfigService, HttpService],
+    }),
+    ImageModule.forRootAsync({
+      imports: [TypeOrmModule.forFeature(FileBaseModule.entities)],
+      controllers: [TextImage],
+      providers: [...FileBaseModule.providers],
     }),
     HttpModule,
   ],
