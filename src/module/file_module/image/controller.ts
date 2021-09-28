@@ -9,20 +9,28 @@ import {
   Body,
   UploadedFile,
   UseInterceptors,
+  Get,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
 import { FileWarpMd5 } from '../types';
+import { MulterError } from 'multer';
 const CrudController = WrapController({
   model: ImageEntity,
 });
-@Controller('image')
+@Controller('file')
 export class ImageController extends CrudController {
   constructor(readonly service: ImageService) {
     super(service);
   }
   @Post('uploadByFormData')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        fileSize: 1024 * 1024 * 5,
+      },
+    }),
+  )
   async uploadImage(
     @UploadedFile() file: FileWarpMd5,
     @Req() req: Request,
@@ -39,7 +47,15 @@ export class ImageController extends CrudController {
     @Body() body: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const result = await this.service.uploadByBinary(req, res);
-    return result;
+    try {
+      const result = await this.service.uploadByBinary(req, res);
+      return result;
+    } catch (e) {
+      throw e;
+    }
+  }
+  @Get('test')
+  test() {
+    return process.memoryUsage();
   }
 }

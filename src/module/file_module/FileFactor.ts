@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { IFileFactory } from './types';
+import { MulterError } from 'multer';
 export interface IFileFactorOption {
   domain: () => string;
 }

@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as FileType from 'file-type';
 import { customAlphabet } from 'nanoid';
+import { MulterError } from 'multer';
 const Alphabet1 = customAlphabet(
   '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
   22,
@@ -27,6 +28,7 @@ function getFilename(req, file, cb) {
 export const mkdirDestination = (path) => {
   mkdirp.sync(path);
 };
+const maxSize = 1024 * 1024 * 100; //100mb
 export class CustomDiskStorage {
   getDestination: any;
   getFilename: any;
@@ -48,18 +50,36 @@ export class CustomDiskStorage {
         if (err) return cb(err);
 
         const stream = await FileType.stream(file ? file.stream : req);
+        console.log(stream.fileType);
+
         const finalPath = path.join(
           destination,
           filename +
             `${
-              (stream.fileType.ext as string) === ''
+              stream.fileType == undefined ||
+              (stream?.fileType?.ext as string) === ''
                 ? ''
                 : '.' + stream.fileType.ext
             }`,
         );
         const outStream = fs.createWriteStream(finalPath);
-        stream.pipe(outStream);
+        let size = 0;
 
+        stream
+          .on('data', (data) => {
+            size += data.length;
+            if (size > maxSize) {
+              stream.pause();
+              stream.destroy(new Error('use memory size large'));
+            }
+          })
+          .pipe(outStream);
+        stream.on('error', (error) => {
+          fs.unlink(finalPath, () => {
+            return cb(error);
+          });
+        });
+        // stream.pipe(outStream);
         outStream.on('error', cb);
         outStream.on('finish', async function () {
           //计算MD5的值，之后返回

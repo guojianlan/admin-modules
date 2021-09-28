@@ -35,7 +35,7 @@ const { Controllers, Services, Entities } = getAddProviders();
       useFactory: async (config: ConfigService, http: HttpService) => {
         Store.userStore = new RedisUserAuthCache({
           host: '127.0.0.1',
-          port: 6379,
+          port: 6378,
           password: '5201314qv',
         });
       },
@@ -54,24 +54,24 @@ const { Controllers, Services, Entities } = getAddProviders();
       inject: [ConfigService],
       destination: 'upload/',
       useFactory: async (configService: ConfigService) => {
-        // return new FileFactor({
-        //   domain: () => {
-        //     return 'http://127.0.0.1:3001';
-        //   },
-        // });
-        return new FileFactorCos({
-          SecretKey: configService.get('COS_SECRETKEY'),
-          SecretId: configService.get('COS_SECRETID'),
-          bucket: configService.get('COS_BUCKET'),
-          region: configService.get('COS_REGION'),
-          Key: (path) => {
-            console.log(path);
-            return path;
-          },
+        return new FileFactor({
           domain: () => {
-            return 'https://testupload-1256172954.cos.ap-chengdu.myqcloud.com';
+            return 'http://127.0.0.1:3001';
           },
         });
+        // return new FileFactorCos({
+        //   SecretKey: configService.get('COS_SECRETKEY'),
+        //   SecretId: configService.get('COS_SECRETID'),
+        //   bucket: configService.get('COS_BUCKET'),
+        //   region: configService.get('COS_REGION'),
+        //   Key: (path) => {
+        //     console.log(path);
+        //     return path;
+        //   },
+        //   domain: () => {
+        //     return 'https://testupload-1256172954.cos.ap-chengdu.myqcloud.com';
+        //   },
+        // });
       },
     }),
     HttpModule,
