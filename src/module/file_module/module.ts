@@ -8,7 +8,9 @@ import {
   FILE_MODULE_PARAM,
 } from './global.var';
 import { Param } from './types';
-
+export const FileStorageInstall = {
+  install: undefined,
+};
 @Module({})
 export class ImageModule {
   static async forRootAsync(param: Param): Promise<DynamicModule> {
@@ -18,10 +20,11 @@ export class ImageModule {
         ...(param && (param.imports || [])),
         MulterModule.registerAsync({
           useFactory: () => {
+            FileStorageInstall.install = new CustomDiskStorage({
+              destination: param.destination || 'upload',
+            });
             return {
-              storage: new CustomDiskStorage({
-                destination: param.destination || 'upload',
-              }),
+              storage: FileStorageInstall.install,
             };
           },
         }),

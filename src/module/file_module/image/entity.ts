@@ -9,7 +9,7 @@ export class ImageEntity extends AbstractTypeEntity {
   object_name: string;
 
   @Column({
-    length: 255,
+    default: 0,
   })
-  md5: string;
+  size: number;
 }

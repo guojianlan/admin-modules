@@ -3,3 +3,4 @@ export * from './image';
 export * from './global.var';
 export * from './types';
 export * from './FileFactor';
+export * from './FileFactorCos';

@@ -3,11 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AbstractTypeOrmService } from '@guojian/nestjs-abstract-module';
 import { Repository } from 'typeorm';
 import { ImageEntity } from './entity';
-import * as FileType from 'file-type';
 import { FILE_MODULE_INIT } from '../global.var';
 import { FileWarpMd5, IFileFactory } from '../types';
 import { Request, Response } from 'express';
-import * as mimeObject from 'mime';
+import * as url from 'url';
+import { FileStorageInstall } from '../module';
 
 @Injectable()
 export class ImageService extends AbstractTypeOrmService<ImageEntity> {
@@ -23,10 +23,31 @@ export class ImageService extends AbstractTypeOrmService<ImageEntity> {
     });
   }
   async uploadObject(file: FileWarpMd5, req: Request, res: Response) {
-    // const { ext, mime } = await FileType.fromBuffer(file.buffer);
-    // const { ext, mime } = await FileType.fromFile(file.path);
-    // console.log(ext, mimeObject.extension(mime));
     //返回链接地址
     const { path, md5, size } = await this.fileFactory.saveFile(file, req, res);
+    //保存数据库
+    const domain = this.fileFactory.domain();
+    const result = await this.create({
+      object_name: path,
+      size: size,
+    });
+    console.log(path);
+    if (result) {
+      return {
+        path: new url.URL(path, domain),
+      };
+    }
+  }
+  async uploadByBinary(req: Request, res: Response) {
+    const file = await new Promise((resolve) => {
+      FileStorageInstall.install._handleFile(
+        req,
+        undefined,
+        function (err, result) {
+          resolve(result);
+        },
+      );
+    });
+    return await this.uploadObject(file as any, req, res);
   }
 }

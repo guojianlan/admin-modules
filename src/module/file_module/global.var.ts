@@ -4,15 +4,29 @@ import * as crypto from 'crypto';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as FileType from 'file-type';
-import * as md5File from 'md5-file';
+import { customAlphabet } from 'nanoid';
+const Alphabet1 = customAlphabet(
+  '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+  22,
+);
+const Alphabet2 = customAlphabet(
+  '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+  20,
+);
+const Alphabet3 = customAlphabet(
+  '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+  18,
+);
+const nanoidRandom = [Alphabet1, Alphabet2, Alphabet3];
 function getDestination(req, file, cb) {
   cb(null, os.tmpdir());
 }
 function getFilename(req, file, cb) {
-  crypto.randomBytes(16, function (err, raw) {
-    cb(err, err ? undefined : raw.toString('hex'));
-  });
+  return cb(null, nanoidRandom[Math.floor(Math.random() * 3)]());
 }
+export const mkdirDestination = (path) => {
+  mkdirp.sync(path);
+};
 export class CustomDiskStorage {
   getDestination: any;
   getFilename: any;
@@ -33,7 +47,7 @@ export class CustomDiskStorage {
       this.getFilename(req, file, async (err, filename) => {
         if (err) return cb(err);
 
-        const stream = await FileType.stream(file.stream);
+        const stream = await FileType.stream(file ? file.stream : req);
         const finalPath = path.join(
           destination,
           filename +
@@ -49,7 +63,7 @@ export class CustomDiskStorage {
         outStream.on('error', cb);
         outStream.on('finish', async function () {
           //计算MD5的值，之后返回
-          const md5 = await md5File(finalPath);
+          const md5 = '';
           cb(null, {
             destination: destination,
             filename: filename,

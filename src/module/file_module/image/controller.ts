@@ -6,6 +6,7 @@ import {
   Post,
   Req,
   Res,
+  Body,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -20,7 +21,7 @@ export class ImageController extends CrudController {
   constructor(readonly service: ImageService) {
     super(service);
   }
-  @Post('upload')
+  @Post('uploadByFormData')
   @UseInterceptors(FileInterceptor('image'))
   async uploadImage(
     @UploadedFile() file: FileWarpMd5,
@@ -29,6 +30,16 @@ export class ImageController extends CrudController {
   ) {
     // 获取临时目录的文件上传
     const result = await this.service.uploadObject(file, req, res);
+    return result;
+  }
+
+  @Post('uploadByBinary')
+  async uploadByBinary(
+    @Req() req: Request,
+    @Body() body: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.service.uploadByBinary(req, res);
     return result;
   }
 }

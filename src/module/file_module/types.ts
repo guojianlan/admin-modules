@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 export type FileWarpMd5 = Express.Multer.File & { md5: string };
 export interface IFileFactory {
+  domain: () => string;
   saveFile: (
     file: FileWarpMd5,
     req: Request,
@@ -18,4 +19,12 @@ export interface Param {
   inject: any[];
   destination?: string;
   useFactory: (...args: any[]) => Promise<IFileFactory>;
+}
+export interface IFileFactorCosOptions {
+  SecretId: string;
+  SecretKey: string;
+  bucket: string;
+  region: string;
+  Key: (filePath: string) => string;
+  domain: () => string;
 }
