@@ -1,4 +1,13 @@
-import { Controller, Module } from '@nestjs/common';
+import {
+  Controller,
+  Module,
+  UseGuards,
+  applyDecorators,
+  SetMetadata,
+  MiddlewareConsumer,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -6,8 +15,16 @@ import { getAddProviders, AdminModule, Store } from './module/admin_module';
 import { HttpModule, HttpService } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisUserAuthCache } from './userCacheRedis';
-import { ImageModule, FileBaseModule, FileFactor } from './module/file_module';
+import {
+  ImageModule,
+  FileBaseModule,
+  FileFactor,
+  ImageController,
+  FileStorageInstall,
+} from './module/file_module';
 import { FileFactorCos } from './module/file_module/FileFactorCos';
+import { Response } from 'express';
+import { ModuleRef } from '@nestjs/core';
 
 const { Controllers, Services, Entities } = getAddProviders();
 
@@ -51,27 +68,40 @@ const { Controllers, Services, Entities } = getAddProviders();
       imports: [TypeOrmModule.forFeature(FileBaseModule.entities)],
       controllers: [...FileBaseModule.controllers],
       providers: [...FileBaseModule.providers],
-      inject: [ConfigService],
+      inject: [ConfigService, ModuleRef],
       destination: 'upload/',
       useFactory: async (configService: ConfigService) => {
-        // return new FileFactor({
-        //   domain: () => {
-        //     return 'http://127.0.0.1:3001';
-        //   },
-        // });
-        return new FileFactorCos({
-          SecretKey: configService.get('COS_SECRETKEY'),
-          SecretId: configService.get('COS_SECRETID'),
-          bucket: configService.get('COS_BUCKET'),
-          region: configService.get('COS_REGION'),
-          Key: (path) => {
-            console.log(path);
-            return path;
-          },
+        const imageMaxSize = 100000;
+        FileStorageInstall.middlewareFn = (consumer: MiddlewareConsumer) => {
+          consumer
+            .apply(function (req, res: Response, next) {
+              const header = req.headers;
+              if (header['content-length'] > imageMaxSize) {
+                next(new BadRequestException());
+              }
+              next();
+            })
+            .forRoutes('image/(*)');
+        };
+        return new FileFactor({
           domain: () => {
-            return 'https://testupload-1256172954.cos.ap-chengdu.myqcloud.com';
+            return 'http://127.0.0.1:3001';
           },
         });
+        // const upload = ImageController.prototype.uploadImage;
+        // return new FileFactorCos({
+        //   SecretKey: configService.get('COS_SECRETKEY'),
+        //   SecretId: configService.get('COS_SECRETID'),
+        //   bucket: configService.get('COS_BUCKET'),
+        //   region: configService.get('COS_REGION'),
+        //   Key: (path) => {
+        //     console.log(path);
+        //     return path;
+        //   },
+        //   domain: () => {
+        //     return 'https://testupload-1256172954.cos.ap-chengdu.myqcloud.com';
+        //   },
+        // });
       },
     }),
     HttpModule,

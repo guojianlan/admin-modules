@@ -1,4 +1,10 @@
-import { DynamicModule, Global, Module } from '@nestjs/common';
+import {
+  DynamicModule,
+  Global,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+} from '@nestjs/common';
 import { ImageController, ImageEntity, ImageService } from './image';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage, diskStorage } from 'multer';
@@ -10,9 +16,10 @@ import {
 import { Param } from './types';
 export const FileStorageInstall = {
   install: undefined,
+  middlewareFn: undefined,
 };
 @Module({})
-export class ImageModule {
+export class ImageModule implements NestModule {
   static async forRootAsync(param: Param): Promise<DynamicModule> {
     return {
       module: ImageModule,
@@ -50,6 +57,9 @@ export class ImageModule {
         ...(param && (param.imports || [])),
       ],
     };
+  }
+  configure(consumer: MiddlewareConsumer): any {
+    FileStorageInstall.middlewareFn(consumer);
   }
 }
 export const FileBaseModule = {
