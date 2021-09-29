@@ -1,4 +1,13 @@
-import { Controller, Module } from '@nestjs/common';
+import {
+  Controller,
+  Module,
+  UseGuards,
+  applyDecorators,
+  SetMetadata,
+  MiddlewareConsumer,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -6,8 +15,16 @@ import { getAddProviders, AdminModule, Store } from './module/admin_module';
 import { HttpModule, HttpService } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisUserAuthCache } from './userCacheRedis';
-import { ImageModule, FileBaseModule, FileFactor } from './module/file_module';
+import {
+  ImageModule,
+  FileBaseModule,
+  FileFactor,
+  ImageController,
+  FileStorageInstall,
+} from './module/file_module';
 import { FileFactorCos } from './module/file_module/FileFactorCos';
+import { Response } from 'express';
+import { ModuleRef } from '@nestjs/core';
 
 const { Controllers, Services, Entities } = getAddProviders();
 
@@ -54,11 +71,24 @@ const { Controllers, Services, Entities } = getAddProviders();
       inject: [ConfigService],
       destination: 'upload/',
       useFactory: async (configService: ConfigService) => {
+        const imageMaxSize = 100000;
+        FileStorageInstall.middlewareFn = (consumer: MiddlewareConsumer) => {
+          consumer
+            .apply(function (req, res: Response, next) {
+              const header = req.headers;
+              if (header['content-length'] > imageMaxSize) {
+                next(new BadRequestException());
+              }
+              next();
+            })
+            .forRoutes('image/(*)');
+        };
         return new FileFactor({
           domain: () => {
             return 'http://127.0.0.1:3001';
           },
         });
+        // const upload = ImageController.prototype.uploadImage;
         // return new FileFactorCos({
         //   SecretKey: configService.get('COS_SECRETKEY'),
         //   SecretId: configService.get('COS_SECRETID'),
