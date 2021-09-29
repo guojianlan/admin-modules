@@ -1,4 +1,4 @@
-import {IAdminGlobal, IUserStore} from './types';
+import { IAdminGlobal, IUserStore } from './types';
 import * as EventEmitter from 'events';
 export const captchaList = {};
 export class AdminStore {
@@ -22,6 +22,6 @@ export const myEmitterInstalled = new MyEmitter();
 export const ADMIN_PARAM_TOKEN = '__ADMIN_PARAM_TOKEN__';
 export const ADMIN_PARAM_INIT_TOKEN = '__ADMIN_PARAM_INIT_TOKEN__';
 
-export const ADMIN_GLOBAL:IAdminGlobal = {
-  header_token:undefined
-}
+export const ADMIN_GLOBAL: IAdminGlobal = {
+  header_token: undefined,
+};

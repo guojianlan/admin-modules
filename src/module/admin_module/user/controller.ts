@@ -53,7 +53,7 @@ export class AdminUserController
     @Res({
       passthrough: true,
     })
-      res: Response,
+    res: Response,
   ) {
     await this.service.checkCode(body.code, req);
     const user = await this.service.loginByUsername(body);
@@ -77,7 +77,7 @@ export class AdminUserController
     @Res({
       passthrough: true,
     })
-      res: Response,
+    res: Response,
   ) {
     //创建管理员
     const user = await this.service.find();
@@ -97,7 +97,7 @@ export class AdminUserController
     @Res({
       passthrough: true,
     })
-      res: Response,
+    res: Response,
   ) {
     await this.service.checkCode(body.code, req);
     await this.service.deleteCaptcha(res);

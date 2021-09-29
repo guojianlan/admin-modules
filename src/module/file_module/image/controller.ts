@@ -9,12 +9,29 @@ import {
   Body,
   UploadedFile,
   UseInterceptors,
-  Get,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
 import { FileWarpMd5 } from '../types';
-import { MulterError } from 'multer';
+
+import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
+import { AuthGuard } from '../../admin_module/decorators';
+import { RunFnGuard } from '../runFn';
+
+export const ImageControllerExtendOption: {
+  uploadFileOptions: MulterOptions;
+  fieldName: string;
+  uploadImageDecorators: any;
+} = {
+  fieldName: 'file',
+  uploadFileOptions: {
+    limits: {
+      fileSize: 1024 * 1024 * 5,
+    },
+  },
+  uploadImageDecorators: undefined,
+};
 const CrudController = WrapController({
   model: ImageEntity,
 });
@@ -23,12 +40,12 @@ export class ImageController extends CrudController {
   constructor(readonly service: ImageService) {
     super(service);
   }
+
   @Post('uploadByFormData')
+  @UseGuards(RunFnGuard)
   @UseInterceptors(
-    FileInterceptor('file', {
-      limits: {
-        fileSize: 1024 * 1024 * 5,
-      },
+    FileInterceptor(ImageControllerExtendOption.fieldName, {
+      ...ImageControllerExtendOption.uploadFileOptions,
     }),
   )
   async uploadImage(
@@ -53,9 +70,5 @@ export class ImageController extends CrudController {
     } catch (e) {
       throw e;
     }
-  }
-  @Get('test')
-  test() {
-    return process.memoryUsage();
   }
 }

@@ -24,8 +24,8 @@ export class TransformerPassword implements ValueTransformer {
     return hash(val);
   }
 }
-@Entity('admin_user',{
-  synchronize: false
+@Entity('admin_user', {
+  synchronize: false,
 })
 export class AdminUserEntity extends AbstractTypeEntity {
   // 用户手机号

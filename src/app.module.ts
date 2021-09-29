@@ -1,16 +1,15 @@
 import {
-  Controller,
   Module,
-  UseGuards,
-  applyDecorators,
-  SetMetadata,
   MiddlewareConsumer,
   BadRequestException,
   ForbiddenException,
+  forwardRef,
+  INestApplication,
 } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { getAddProviders, AdminModule, Store } from './module/admin_module';
 import { HttpModule, HttpService } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -19,15 +18,20 @@ import {
   ImageModule,
   FileBaseModule,
   FileFactor,
-  ImageController,
   FileStorageInstall,
 } from './module/file_module';
-import { FileFactorCos } from './module/file_module/FileFactorCos';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { GuardStore } from './module/file_module/runFn';
+import { AuthGuard } from './module/admin_module/decorators';
+import { AdminAuthGuard } from './module/admin_module/decorators/guards';
+import { MulterError } from 'multer';
 import { ModuleRef } from '@nestjs/core';
-
 const { Controllers, Services, Entities } = getAddProviders();
-
+export const RootModule: {
+  install: INestApplication;
+} = {
+  install: undefined,
+};
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -68,27 +72,28 @@ const { Controllers, Services, Entities } = getAddProviders();
       imports: [TypeOrmModule.forFeature(FileBaseModule.entities)],
       controllers: [...FileBaseModule.controllers],
       providers: [...FileBaseModule.providers],
-      inject: [ConfigService],
+      inject: [ConfigService, ModuleRef],
       destination: 'upload/',
-      useFactory: async (configService: ConfigService) => {
-        const imageMaxSize = 100000;
-        FileStorageInstall.middlewareFn = (consumer: MiddlewareConsumer) => {
-          consumer
-            .apply(function (req, res: Response, next) {
-              const header = req.headers;
-              if (header['content-length'] > imageMaxSize) {
-                next(new BadRequestException());
-              }
-              next();
-            })
-            .forRoutes('image/(*)');
+      useFactory: async (
+        configService: ConfigService,
+        moduleRef: ModuleRef,
+      ) => {
+        const imageMaxSize = 1024 * 1024 * 10; //100
+        GuardStore.inject = async (context) => {
+          //限制大小
+          const req = context.switchToHttp().getRequest<Request>();
+          const header = req.headers;
+          if (+header['content-length'] > imageMaxSize) {
+            throw new BadRequestException();
+          }
+          const auth = RootModule.install.get(AdminAuthGuard);
+          return await auth.canActivate(context);
         };
         return new FileFactor({
           domain: () => {
             return 'http://127.0.0.1:3001';
           },
         });
-        // const upload = ImageController.prototype.uploadImage;
         // return new FileFactorCos({
         //   SecretKey: configService.get('COS_SECRETKEY'),
         //   SecretId: configService.get('COS_SECRETID'),

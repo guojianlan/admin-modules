@@ -45,3 +45,20 @@ ImageModule.forRootAsync({
   },
 }),
 ```
+---
+
+如果想限制文件大小，则需要在中间件里面去实现，我暂时没找到好的方法
+```ts
+const imageMaxSize = 1024 * 1024 * 10; //100M
+FileStorageInstall.middlewareFn = (consumer: MiddlewareConsumer) => {
+  consumer
+    .apply(async function (req: Request, res: Response, next) {
+      const header = req.headers;
+      if (+header['content-length'] > imageMaxSize) {
+        next(new BadRequestException('file size large'));
+      }
+      next();
+    })
+    .forRoutes('file/(*)');
+};
+```

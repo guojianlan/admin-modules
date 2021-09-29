@@ -1,5 +1,5 @@
 import { AdminUserEntity } from './user';
-import {ADMIN_GLOBAL} from "./global.var";
+import { ADMIN_GLOBAL } from './global.var';
 
 export interface IJwtOptions {
   secret?: string;
@@ -31,6 +31,6 @@ export interface ICustomReq {
   public: boolean;
 }
 
-export interface IAdminGlobal{
-  header_token:string
+export interface IAdminGlobal {
+  header_token: string;
 }

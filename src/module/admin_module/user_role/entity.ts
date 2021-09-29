@@ -3,8 +3,8 @@ import { AbstractTypeEntity } from '@guojian/nestjs-abstract-module';
 import { AdminUserEntity } from '../user';
 import { AdminRoleEntity } from '../role';
 
-@Entity('admin_user_role',{
-  synchronize: false
+@Entity('admin_user_role', {
+  synchronize: false,
 })
 export class AdminUserRoleEntity extends AbstractTypeEntity {
   static __delete_table__ = 'del_admin_user_role';

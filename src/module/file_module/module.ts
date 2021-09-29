@@ -59,7 +59,8 @@ export class ImageModule implements NestModule {
     };
   }
   configure(consumer: MiddlewareConsumer): any {
-    FileStorageInstall.middlewareFn(consumer);
+    FileStorageInstall.middlewareFn &&
+      FileStorageInstall.middlewareFn(consumer);
   }
 }
 export const FileBaseModule = {
