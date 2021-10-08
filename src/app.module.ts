@@ -1,4 +1,4 @@
-import { Module, BadRequestException, INestApplication } from '@nestjs/common';
+import { Module, INestApplication } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,6 +11,7 @@ import {
   FileBaseModule,
   FileFactor,
 } from '@guojian/nestjs-file-module';
+import { UserModule, UserBaseModule } from './module/user_module';
 const { Controllers, Services, Entities } = getAddProviders();
 export const RootModule: {
   install: INestApplication;
@@ -31,7 +32,11 @@ export const RootModule: {
           port: 3316,
           password: 'example',
           database: 'test1',
-          entities: [...Object.values(Entities), ...FileBaseModule.entities],
+          entities: [
+            ...Object.values(Entities),
+            ...FileBaseModule.entities,
+            ...UserBaseModule.entities,
+          ],
           synchronize: true,
           logging: false,
         };
@@ -91,6 +96,18 @@ export const RootModule: {
         //   },
         // });
       },
+    }),
+    UserModule.forRootAsync({
+      imports: [
+        ConfigModule,
+        TypeOrmModule.forFeature(UserBaseModule.entities),
+      ],
+      controllers: [...UserBaseModule.controllers],
+      providers: [...UserBaseModule.providers],
+      useFactory: (UserController, UserService, ...args) => {
+        console.log(args);
+      },
+      inject: [ConfigService],
     }),
     HttpModule,
   ],
