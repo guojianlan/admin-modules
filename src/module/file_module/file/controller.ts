@@ -1,6 +1,6 @@
 import { WrapController } from '@guojian/nestjs-abstract-module';
-import { ImageEntity } from './entity';
-import { ImageService } from './service';
+import { FileEntity } from './entity';
+import { FileService } from './service';
 import {
   Controller,
   Post,
@@ -14,40 +14,19 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
 import { FileWarpMd5 } from '../types';
-
-import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
-import { AuthGuard } from '../../admin_module/decorators';
 import { RunFnGuard } from '../runFn';
-
-export const ImageControllerExtendOption: {
-  uploadFileOptions: MulterOptions;
-  fieldName: string;
-  uploadImageDecorators: any;
-} = {
-  fieldName: 'file',
-  uploadFileOptions: {
-    limits: {
-      fileSize: 1024 * 1024 * 5,
-    },
-  },
-  uploadImageDecorators: undefined,
-};
 const CrudController = WrapController({
-  model: ImageEntity,
+  model: FileEntity,
 });
 @Controller('file')
-export class ImageController extends CrudController {
-  constructor(readonly service: ImageService) {
+export class FileController extends CrudController {
+  constructor(readonly service: FileService) {
     super(service);
   }
 
   @Post('uploadByFormData')
   @UseGuards(RunFnGuard)
-  @UseInterceptors(
-    FileInterceptor(ImageControllerExtendOption.fieldName, {
-      ...ImageControllerExtendOption.uploadFileOptions,
-    }),
-  )
+  @UseInterceptors(FileInterceptor('file'))
   async uploadImage(
     @UploadedFile() file: FileWarpMd5,
     @Req() req: Request,

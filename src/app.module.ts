@@ -1,31 +1,16 @@
-import {
-  Module,
-  MiddlewareConsumer,
-  BadRequestException,
-  ForbiddenException,
-  forwardRef,
-  INestApplication,
-} from '@nestjs/common';
+import { Module, BadRequestException, INestApplication } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
 import { getAddProviders, AdminModule, Store } from './module/admin_module';
 import { HttpModule, HttpService } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisUserAuthCache } from './userCacheRedis';
 import {
-  ImageModule,
+  FileModule,
   FileBaseModule,
   FileFactor,
-  FileStorageInstall,
-} from './module/file_module';
-import { Request, Response } from 'express';
-import { GuardStore } from './module/file_module/runFn';
-import { AuthGuard } from './module/admin_module/decorators';
-import { AdminAuthGuard } from './module/admin_module/decorators/guards';
-import { MulterError } from 'multer';
-import { ModuleRef } from '@nestjs/core';
+} from '@guojian/nestjs-file-module';
 const { Controllers, Services, Entities } = getAddProviders();
 export const RootModule: {
   install: INestApplication;
@@ -68,30 +53,28 @@ export const RootModule: {
       providers: [...Object.values(Services)],
       inject: [ConfigService],
     }),
-    ImageModule.forRootAsync({
-      imports: [TypeOrmModule.forFeature(FileBaseModule.entities)],
+    FileModule.forRootAsync({
+      imports: [TypeOrmModule.forFeature(FileBaseModule.entities), HttpModule],
       controllers: [...FileBaseModule.controllers],
       providers: [...FileBaseModule.providers],
-      inject: [ConfigService, ModuleRef],
       destination: 'upload/',
-      useFactory: async (
-        configService: ConfigService,
-        moduleRef: ModuleRef,
-      ) => {
+      inject: [ConfigService, HttpService],
+      useFactory: async (FileStorageInstall, GuardStore) => {
         const imageMaxSize = 1024 * 1024 * 10; //100
-        GuardStore.inject = async (context) => {
-          //限制大小
-          const req = context.switchToHttp().getRequest<Request>();
-          const header = req.headers;
-          if (+header['content-length'] > imageMaxSize) {
-            throw new BadRequestException();
-          }
-          const auth = RootModule.install.get(AdminAuthGuard);
-          return await auth.canActivate(context);
-        };
+        // GuardStore.inject = async (context) => {
+        //   //限制大小
+        //   // const req = context.switchToHttp().getRequest<Request>();
+        //   // const header = req.headers;
+        //   // if (+header['content-length'] > imageMaxSize) {
+        //   //   throw new BadRequestException();
+        //   // }
+        //   // const auth = RootModule.install.get(AdminAuthGuard);
+        //   // return await auth.canActivate(context);
+        //   return true;
+        // };
         return new FileFactor({
           domain: () => {
-            return 'http://127.0.0.1:3001';
+            return process.env.image_domain;
           },
         });
         // return new FileFactorCos({
@@ -104,7 +87,7 @@ export const RootModule: {
         //     return path;
         //   },
         //   domain: () => {
-        //     return 'https://testupload-1256172954.cos.ap-chengdu.myqcloud.com';
+        //     return process.env.image_domain;
         //   },
         // });
       },

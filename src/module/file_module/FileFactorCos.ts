@@ -1,18 +1,19 @@
-import { Request, Response } from 'express';
-import { ParamsDictionary } from 'express-serve-static-core';
-import { ParsedQs } from 'qs';
-import { IFileFactorCosOptions, IFileFactory } from './types';
+import { IFileFactory } from './types';
 import * as COS from 'cos-nodejs-sdk-v5';
 import * as fs from 'fs-extra';
-const prefix = () => {
-  return '';
-};
+export interface IFileFactorCosOptions {
+  SecretId: string;
+  SecretKey: string;
+  bucket: string;
+  region: string;
+  Key: (filePath: string) => string;
+  domain: () => string;
+}
 export class FileFactorCos implements IFileFactory {
   domain: () => string;
   cos: COS;
   bucket: string;
   region: string;
-  prefix: () => string;
   Key: (path: string) => string;
   constructor(options: IFileFactorCosOptions) {
     this.cos = new COS({
@@ -25,11 +26,7 @@ export class FileFactorCos implements IFileFactory {
     this.domain = options.domain;
   }
 
-  async saveFile(
-    file: Express.Multer.File & { md5: string },
-    req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>,
-    res: Response<any, Record<string, any>>,
-  ) {
+  async saveFile(file: Express.Multer.File & { md5: string }) {
     try {
       const key = this.Key(file.path);
       const result = await this.cos.putObject({

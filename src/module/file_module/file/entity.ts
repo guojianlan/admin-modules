@@ -1,8 +1,8 @@
 import { AbstractTypeEntity } from '@guojian/nestjs-abstract-module';
 import { Column, Entity } from 'typeorm';
 
-@Entity('image')
-export class ImageEntity extends AbstractTypeEntity {
+@Entity('file')
+export class FileEntity extends AbstractTypeEntity {
   @Column({
     length: 1000,
   })

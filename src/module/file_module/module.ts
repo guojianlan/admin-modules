@@ -1,28 +1,21 @@
-import {
-  DynamicModule,
-  Global,
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-} from '@nestjs/common';
-import { ImageController, ImageEntity, ImageService } from './image';
+import { DynamicModule, Module } from '@nestjs/common';
+import { FileController, FileEntity, FileService } from './file';
 import { MulterModule } from '@nestjs/platform-express';
-import { memoryStorage, diskStorage } from 'multer';
 import {
   CustomDiskStorage,
   FILE_MODULE_INIT,
   FILE_MODULE_PARAM,
 } from './global.var';
-import { Param } from './types';
-export const FileStorageInstall = {
+import { IFileStorageInstall, Param } from './types';
+import { GuardStore } from './runFn';
+export const FileStorageInstall: IFileStorageInstall = {
   install: undefined,
-  middlewareFn: undefined,
 };
 @Module({})
-export class ImageModule implements NestModule {
+export class FileModule {
   static async forRootAsync(param: Param): Promise<DynamicModule> {
     return {
-      module: ImageModule,
+      module: FileModule,
       imports: [
         ...(param && (param.imports || [])),
         MulterModule.registerAsync({
@@ -44,9 +37,12 @@ export class ImageModule implements NestModule {
         },
         {
           provide: FILE_MODULE_INIT,
-          useFactory: async (params) => {
-            console.log(params);
-            return await param.useFactory(params);
+          useFactory: async (...args) => {
+            return await param.useFactory.apply(this, [
+              FileStorageInstall,
+              GuardStore,
+              ...args,
+            ]);
           },
           inject: [...(param && (param.inject || []))],
         },
@@ -58,13 +54,10 @@ export class ImageModule implements NestModule {
       ],
     };
   }
-  configure(consumer: MiddlewareConsumer): any {
-    FileStorageInstall.middlewareFn &&
-      FileStorageInstall.middlewareFn(consumer);
-  }
 }
+
 export const FileBaseModule = {
-  controllers: [ImageController],
-  providers: [ImageService],
-  entities: [ImageEntity],
+  controllers: [FileController],
+  providers: [FileService],
+  entities: [FileEntity],
 };

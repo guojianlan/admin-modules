@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AbstractTypeOrmService } from '@guojian/nestjs-abstract-module';
 import { Repository } from 'typeorm';
-import { ImageEntity } from './entity';
+import { FileEntity } from './entity';
 import { FILE_MODULE_INIT } from '../global.var';
 import { FileWarpMd5, IFileFactory } from '../types';
 import { Request, Response } from 'express';
@@ -10,13 +10,13 @@ import * as url from 'url';
 import { FileStorageInstall } from '../module';
 
 @Injectable()
-export class ImageService extends AbstractTypeOrmService<ImageEntity> {
+export class FileService extends AbstractTypeOrmService<FileEntity> {
   constructor(
-    @InjectRepository(ImageEntity)
-    readonly repository: Repository<ImageEntity>, // entity,
+    @InjectRepository(FileEntity)
+    readonly repository: Repository<FileEntity>, // entity,
     @Inject(FILE_MODULE_INIT) private readonly fileFactory: IFileFactory,
   ) {
-    super(repository, ImageEntity);
+    super(repository, FileEntity);
     this.options = Object.assign({
       ...this.options,
       deleteAfterAction: 'normal',
@@ -25,6 +25,7 @@ export class ImageService extends AbstractTypeOrmService<ImageEntity> {
   async uploadObject(file: FileWarpMd5, req: Request, res: Response) {
     //返回链接地址
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { path, md5, size } = await this.fileFactory.saveFile(
         file,
         req,

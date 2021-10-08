@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@guojian/nestjs-abstract-module": "^1.0.0",
+    "@guojian/nestjs-file-module": "^1.0.1",
     "@nestjs/axios": "0.0.1",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^1.0.1",
