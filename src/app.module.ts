@@ -11,7 +11,8 @@ import {
   FileBaseModule,
   FileFactor,
 } from '@guojian/nestjs-file-module';
-import { UserModule, UserBaseModule } from './module/user_module';
+// import { ExtendEntity, UserModule } from './user/module';
+import { UserModule, UserEntity } from './module/user_module';
 const { Controllers, Services, Entities } = getAddProviders();
 export const RootModule: {
   install: INestApplication;
@@ -35,7 +36,7 @@ export const RootModule: {
           entities: [
             ...Object.values(Entities),
             ...FileBaseModule.entities,
-            ...UserBaseModule.entities,
+            UserEntity,
           ],
           synchronize: true,
           logging: false,
@@ -46,7 +47,7 @@ export const RootModule: {
       useFactory: async (config: ConfigService, http: HttpService) => {
         Store.userStore = new RedisUserAuthCache({
           host: '127.0.0.1',
-          port: 6378,
+          port: 6379,
           password: '5201314qv',
         });
       },
@@ -97,18 +98,7 @@ export const RootModule: {
         // });
       },
     }),
-    UserModule.forRootAsync({
-      imports: [
-        ConfigModule,
-        TypeOrmModule.forFeature(UserBaseModule.entities),
-      ],
-      controllers: [...UserBaseModule.controllers],
-      providers: [...UserBaseModule.providers],
-      useFactory: (UserController, UserService, ...args) => {
-        console.log(args);
-      },
-      inject: [ConfigService],
-    }),
+    UserModule,
     HttpModule,
   ],
   controllers: [AppController],
